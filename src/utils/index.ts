@@ -1,2 +1,2 @@
-// Application-wide utility functions
-// Export utilities from this barrel file as they are added.
+export { decodeJwt, getUserFromToken } from "./jwt";
+export type { JwtUser } from "./jwt";

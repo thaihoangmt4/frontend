@@ -19,3 +19,5 @@ export type ApiError = {
   status: number;
   errors?: Record<string, string[]>;
 };
+
+export type * from "./auth";

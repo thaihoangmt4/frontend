@@ -1,2 +1,2 @@
-export { axiosClient } from "./axios-client";
+export { axiosClient } from "./axios";
 export { cn } from "./utils";
