@@ -13,17 +13,19 @@ export default function LoginPage() {
   const { isAuthenticated, isLoading, loginWithGoogle } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [loginAttempted, setLoginAttempted] = useState(false);
 
   // Already authenticated → redirect
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (!isLoading && isAuthenticated && !loginAttempted) {
       router.replace(redirect);
     }
-  }, [isAuthenticated, isLoading, redirect, router]);
+  }, [isAuthenticated, isLoading, loginAttempted, redirect, router]);
 
   const handleSuccess = async (credential: string) => {
     setError(null);
     setPending(true);
+    setLoginAttempted(true);
 
     try {
       // POST /api/Auth/google → stores tokens in Zustand + localStorage
