@@ -22,7 +22,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Profile", href: "/profile", icon: UserRound },
-  { label: "Lessons", href: "#", icon: BookOpen },
+  { label: "Courses", href: "/courses", icon: BookOpen },
   { label: "Practice", href: "#", icon: MessageSquareText },
 ];
 

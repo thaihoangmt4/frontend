@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Dashboard — AI English Learning Platform",
@@ -46,9 +47,12 @@ export default function DashboardPage() {
           skills.
         </p>
         <div className="mt-5">
-          <span className="inline-flex h-10 items-center rounded-lg bg-blue-600 px-5 text-sm font-medium text-white">
-            Start a lesson
-          </span>
+          <Link
+            href="/courses"
+            className="inline-flex h-10 items-center rounded-lg bg-blue-600 px-5 text-sm font-medium text-white outline-none hover:bg-blue-700 focus-visible:ring-3 focus-visible:ring-blue-500/30"
+          >
+            Browse courses
+          </Link>
         </div>
       </div>
     </div>

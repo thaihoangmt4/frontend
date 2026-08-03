@@ -6,6 +6,7 @@ type Props = {
   icon?: LucideIcon;
   title: string;
   description?: string;
+  headingLevel?: 1 | 2 | 3;
   action?: {
     label: string;
     onClick?: () => void;
@@ -18,9 +19,12 @@ export function EmptyState({
   icon: Icon,
   title,
   description,
+  headingLevel = 3,
   action,
   className,
 }: Props) {
+  const Heading = headingLevel === 1 ? "h1" : headingLevel === 2 ? "h2" : "h3";
+
   return (
     <div
       className={cn(
@@ -30,13 +34,16 @@ export function EmptyState({
     >
       {Icon && (
         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-800">
-          <Icon className="h-6 w-6 text-neutral-400 dark:text-neutral-500" />
+          <Icon
+            aria-hidden="true"
+            className="h-6 w-6 text-neutral-400 dark:text-neutral-500"
+          />
         </div>
       )}
 
-      <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+      <Heading className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
         {title}
-      </h3>
+      </Heading>
 
       {description && (
         <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
@@ -49,7 +56,7 @@ export function EmptyState({
           {action.href ? (
             <Link
               href={action.href}
-              className="inline-flex h-10 items-center rounded-lg bg-blue-600 px-5 text-sm font-medium text-white hover:bg-blue-700"
+              className="inline-flex h-10 items-center rounded-lg bg-blue-600 px-5 text-sm font-medium text-white outline-none hover:bg-blue-700 focus-visible:ring-3 focus-visible:ring-blue-500/30"
             >
               {action.label}
             </Link>
@@ -57,7 +64,7 @@ export function EmptyState({
             <button
               type="button"
               onClick={action.onClick}
-              className="inline-flex h-10 items-center rounded-lg bg-blue-600 px-5 text-sm font-medium text-white hover:bg-blue-700"
+              className="inline-flex h-10 items-center rounded-lg bg-blue-600 px-5 text-sm font-medium text-white outline-none hover:bg-blue-700 focus-visible:ring-3 focus-visible:ring-blue-500/30"
             >
               {action.label}
             </button>
