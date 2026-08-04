@@ -132,8 +132,8 @@ function UnitCard({ unit, ordinal }: { unit: CourseUnit; ordinal: number }) {
 function LessonListItem({ lesson }: { lesson: CourseLesson }) {
   return (
     <Link
-      href={`/lessons/${lesson.id}`}
-      aria-label={`View lesson ${lesson.title}`}
+      href={`/learn/lessons/${lesson.id}`}
+      aria-label={`Start lesson ${lesson.title}`}
       className="group flex flex-col gap-4 p-5 outline-none transition-colors hover:bg-blue-50/40 focus-visible:bg-blue-50 focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-blue-500/20 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:hover:bg-blue-950/20 dark:focus-visible:bg-blue-950/30"
     >
       <div className="min-w-0">
@@ -164,7 +164,7 @@ function LessonListItem({ lesson }: { lesson: CourseLesson }) {
       </div>
 
       <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400">
-        View lesson
+        Start lesson
         <ArrowRight aria-hidden="true" className="h-4 w-4" />
       </span>
     </Link>

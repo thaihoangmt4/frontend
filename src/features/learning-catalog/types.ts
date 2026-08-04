@@ -1,6 +1,15 @@
 export type CefrLevel = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
 
-export type LessonDifficulty = "Introductory" | "Standard" | "Advanced";
+export type DifficultyLevel =
+  | "Beginner"
+  | "Elementary"
+  | "Intermediate"
+  | "UpperIntermediate"
+  | "Advanced"
+  | "Proficient";
+
+// Kept as an alias so Sprint 4 consumers do not need to change imports.
+export type LessonDifficulty = DifficultyLevel;
 
 export type KnownLessonSectionType =
   | "Introduction"
