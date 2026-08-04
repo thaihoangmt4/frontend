@@ -13,6 +13,8 @@ import type {
   QuestionStep,
 } from "../learning.types";
 import { useLessonPlayer } from "../use-lesson-player";
+import { useNextLearningAudioPreload } from "../use-next-learning-audio-preload";
+import { useLearningImagePreload } from "../use-learning-image-preload";
 import { AnswerFeedback } from "./answer-feedback";
 import { LearningStepRenderer } from "./learning-step-renderer";
 
@@ -26,6 +28,14 @@ export function LessonPlayer({
   const evaluationMutation = useEvaluateQuestionMutation();
   const submissionInFlightRef = useRef(false);
   const stepContentRef = useRef<HTMLElement>(null);
+  useNextLearningAudioPreload(
+    learningFlow.steps[player.state.currentStepIndex],
+    learningFlow.steps[player.state.currentStepIndex + 1],
+  );
+  useLearningImagePreload(
+    learningFlow.steps[player.state.currentStepIndex],
+    learningFlow.steps[player.state.currentStepIndex + 1],
+  );
 
   useEffect(() => {
     if (player.state.currentStepIndex > 0) stepContentRef.current?.focus();

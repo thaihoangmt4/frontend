@@ -2,6 +2,7 @@
 
 import { LearningAudio, LearningImage } from "./learning-media";
 import type { InstructionStep } from "../learning.types";
+import { buildVocabularyImageSearchQuery } from "../image-search";
 
 export function VocabularyInstruction({ instruction }: { instruction: InstructionStep }) {
   const vocabulary = instruction.vocabulary;
@@ -19,8 +20,8 @@ export function VocabularyInstruction({ instruction }: { instruction: Instructio
       )}
       <div className="mt-4 grid gap-6 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:items-center">
         <LearningImage
-          src={vocabulary.imageUrl}
-          alt={vocabulary.word}
+          searchQuery={buildVocabularyImageSearchQuery(vocabulary.word, vocabulary.meaning)}
+          alt={`Illustration for the word ${vocabulary.word}`}
           className="aspect-square"
         />
         <div>
@@ -36,7 +37,10 @@ export function VocabularyInstruction({ instruction }: { instruction: Instructio
             </p>
           )}
           <div className="mt-4">
-            <LearningAudio src={vocabulary.audioUrl} label={`pronunciation of ${vocabulary.word}`} />
+            <LearningAudio
+              text={vocabulary.word}
+              label={`pronunciation for ${vocabulary.word}`}
+            />
           </div>
           <p className="mt-5 text-xl font-semibold text-neutral-800 dark:text-neutral-200">
             {vocabulary.meaning}

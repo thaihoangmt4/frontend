@@ -4,6 +4,10 @@ import { LearningStepRenderer } from "./learning-step-renderer";
 import { instructionStep, questionStep } from "../test-fixtures";
 import type { LearningStep } from "../learning.types";
 
+vi.mock("../use-learning-image", () => ({
+  useLearningImage: () => ({ image: null, isLoading: false, isUnavailable: true }),
+}));
+
 const handlers = {
   selectedOptionId: null,
   textAnswer: "",
@@ -18,7 +22,9 @@ describe("LearningStepRenderer", () => {
   it("renders an instruction", () => {
     render(<LearningStepRenderer step={instructionStep()} {...handlers} />);
     expect(screen.getByRole("heading", { name: "apple" })).toBeInTheDocument();
-    expect(screen.getByText("Audio unavailable. You can continue without it.")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Play pronunciation for apple" }),
+    ).toBeInTheDocument();
   });
 
   it("renders a question", () => {

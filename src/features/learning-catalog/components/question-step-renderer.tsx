@@ -10,6 +10,7 @@ import type {
   QuestionStep,
 } from "../learning.types";
 import { isQuestionType } from "../learning.types";
+import { buildVocabularyImageSearchQuery, resolveQuestionPromptImageSearchTerm } from "../image-search";
 
 export type QuestionRendererProps = {
   question: QuestionStep;
@@ -52,6 +53,7 @@ export function QuestionStepRenderer(props: QuestionRendererProps) {
 }
 
 function QuestionHeading({ question }: { question: QuestionStep }) {
+  const promptImageQuery = resolveQuestionPromptImageSearchTerm(question);
   return (
     <>
       <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">
@@ -60,9 +62,9 @@ function QuestionHeading({ question }: { question: QuestionStep }) {
       <h1 id="lesson-player-heading" className="mt-2 text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl dark:text-neutral-100">
         {question.prompt}
       </h1>
-      {question.promptImageUrl && (
+      {promptImageQuery && (
         <div className="mt-6">
-          <LearningImage src={question.promptImageUrl} alt="Question illustration" />
+          <LearningImage searchQuery={promptImageQuery} alt="Question illustration" />
         </div>
       )}
     </>
@@ -70,10 +72,14 @@ function QuestionHeading({ question }: { question: QuestionStep }) {
 }
 
 function PromptAudio({ question, prominent = false }: { question: QuestionStep; prominent?: boolean }) {
-  if (!question.promptAudioUrl) return null;
+  if (question.type !== "audioMultipleChoice") return null;
   return (
     <div className="mt-6">
-      <LearningAudio src={question.promptAudioUrl} label="question audio" prominent={prominent} />
+      <LearningAudio
+        text=""
+        label="question audio"
+        prominent={prominent}
+      />
     </div>
   );
 }
@@ -104,7 +110,11 @@ function ImageMultipleChoice(props: QuestionRendererProps) {
               onSelect={() => props.onSelectOption(option.id)}
               label={label}
             >
-              <LearningImage src={option.imageUrl} alt={label} className="aspect-square" />
+              <LearningImage
+                searchQuery={buildVocabularyImageSearchQuery(option.text || option.accessibilityText || "")}
+                alt={label}
+                className="aspect-square"
+              />
               {option.text && (
                 <span className="mt-3 block text-center font-semibold">{option.text}</span>
               )}

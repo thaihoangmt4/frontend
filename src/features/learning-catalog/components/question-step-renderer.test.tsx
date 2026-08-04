@@ -1,6 +1,10 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
+
+vi.mock("../use-learning-image", () => ({
+  useLearningImage: () => ({ image: null, isLoading: false, isUnavailable: true }),
+}));
 import { QuestionStepRenderer, type QuestionRendererProps } from "./question-step-renderer";
 import { question } from "../test-fixtures";
 import type { QuestionStep } from "../learning.types";
@@ -61,23 +65,17 @@ describe("QuestionStepRenderer", () => {
     expect(screen.getByRole("radio", { name: "orange. Incorrect answer" })).toBeDisabled();
   });
 
-  it("uses accessibility text and falls back when an image fails", () => {
+  it("uses accessibility text when a provider image is unavailable", () => {
     renderQuestion({ question: question("imageMultipleChoice") });
-    const image = screen.getByAltText("A red apple");
-    fireEvent.error(image);
     expect(screen.getByRole("img", { name: "A red apple. Image unavailable." })).toBeInTheDocument();
+    expect(document.querySelector('img[src="/apple.webp"]')).not.toBeInTheDocument();
   });
 
-  it("renders accessible replayable audio controls and handles missing audio", async () => {
-    const user = userEvent.setup();
-    const play = vi.mocked(HTMLMediaElement.prototype.play);
-    play.mockClear();
+  it("ignores prompt audio URLs when no safe speech transcript exists", () => {
     const audioQuestion = question("audioMultipleChoice");
     const { rerender } = renderQuestion({ question: audioQuestion });
-    const playButton = screen.getByRole("button", { name: "Play question audio" });
-    await user.click(playButton);
-    await user.click(playButton);
-    expect(play).toHaveBeenCalledTimes(2);
+    expect(screen.queryByRole("button", { name: /question audio/i })).not.toBeInTheDocument();
+    expect(screen.getByText("Audio unavailable. You can continue without it.")).toBeInTheDocument();
     rerender(
       <QuestionStepRenderer
         question={{ ...audioQuestion, promptAudioUrl: null }}
@@ -90,7 +88,8 @@ describe("QuestionStepRenderer", () => {
         onSubmit={vi.fn()}
       />,
     );
-    expect(screen.queryByRole("button", { name: "Play question audio" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /question audio/i })).not.toBeInTheDocument();
+    expect(screen.getByText("Audio unavailable. You can continue without it.")).toBeInTheDocument();
   });
 
   it("submits valid text with Enter and preserves the displayed value", async () => {
