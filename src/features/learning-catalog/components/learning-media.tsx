@@ -1,49 +1,31 @@
 "use client";
 
-import Image, { type ImageLoaderProps } from "next/image";
+import Image from "next/image";
 import { ImageOff, LoaderCircle, Pause, Play, Volume2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useLearningImage } from "../use-learning-image";
+import { resolveLearningImageSource } from "../media";
 import { useLearningAudio } from "../use-learning-audio";
 
-function mediaLoader({ src }: ImageLoaderProps): string {
-  return src;
-}
-
 export function LearningImage({
-  searchQuery,
+  src,
   alt,
   className = "aspect-video",
 }: {
-  searchQuery: string | null;
+  src: string | null;
   alt: string;
   className?: string;
 }) {
-  if (
-    process.env.NODE_ENV !== "production" &&
-    searchQuery &&
-    (/^https?:\/\//i.test(searchQuery) || /^\//.test(searchQuery) || /media\/vocabulary/i.test(searchQuery))
-  ) {
-    throw new Error("LearningImage accepts a Pixabay search query, not a legacy media URL.");
-  }
-  const imageQuery = useLearningImage(searchQuery);
-  const image = imageQuery.image;
+  const resolvedSrc = resolveLearningImageSource(src);
   const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => setFailed(false), [image?.displayUrl]);
+  useEffect(() => {
+    setFailed(false);
+    setLoaded(false);
+  }, [resolvedSrc]);
 
-  if (imageQuery.isLoading && searchQuery) {
-    return (
-      <div
-        className={`animate-pulse rounded-xl bg-neutral-100 dark:bg-neutral-800 ${className}`}
-        role="status"
-        aria-label={`Loading ${alt}`}
-      />
-    );
-  }
-
-  if (!image || imageQuery.isUnavailable || failed) {
+  if (!resolvedSrc || failed) {
     return (
       <div
         className={`flex items-center justify-center rounded-xl bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400 ${className}`}
@@ -59,25 +41,24 @@ export function LearningImage({
   }
 
   return (
-    <figure className={className}>
-      <div className="relative h-full min-h-40 overflow-hidden rounded-xl bg-neutral-100 dark:bg-neutral-800">
+    <div className={`relative min-h-40 overflow-hidden rounded-xl bg-neutral-100 dark:bg-neutral-800 ${className}`}>
+      {!loaded && (
+        <div
+          className="absolute inset-0 z-10 animate-pulse bg-neutral-100 dark:bg-neutral-800"
+          role="status"
+          aria-label={`Loading ${alt}`}
+        />
+      )}
       <Image
-        loader={mediaLoader}
-        unoptimized
         fill
         sizes="(max-width: 640px) 100vw, 640px"
-        src={image.displayUrl}
+        src={resolvedSrc}
         alt={alt}
-        className="object-cover"
+        className={`object-cover transition-opacity ${loaded ? "opacity-100" : "opacity-0"}`}
+        onLoad={() => setLoaded(true)}
         onError={() => setFailed(true)}
       />
-      </div>
-      <figcaption className="mt-1 text-right text-xs text-neutral-500 dark:text-neutral-400">
-        {image.pageUrl ? (
-          <a href={image.pageUrl} target="_blank" rel="noreferrer">Image from Pixabay</a>
-        ) : "Image from Pixabay"}
-      </figcaption>
-    </figure>
+    </div>
   );
 }
 

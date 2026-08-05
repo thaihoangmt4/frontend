@@ -10,7 +10,6 @@ import type {
   QuestionStep,
 } from "../learning.types";
 import { isQuestionType } from "../learning.types";
-import { buildVocabularyImageSearchQuery, resolveQuestionPromptImageSearchTerm } from "../image-search";
 
 export type QuestionRendererProps = {
   question: QuestionStep;
@@ -53,7 +52,6 @@ export function QuestionStepRenderer(props: QuestionRendererProps) {
 }
 
 function QuestionHeading({ question }: { question: QuestionStep }) {
-  const promptImageQuery = resolveQuestionPromptImageSearchTerm(question);
   return (
     <>
       <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">
@@ -62,9 +60,9 @@ function QuestionHeading({ question }: { question: QuestionStep }) {
       <h1 id="lesson-player-heading" className="mt-2 text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl dark:text-neutral-100">
         {question.prompt}
       </h1>
-      {promptImageQuery && (
+      {question.promptImageUrl && (
         <div className="mt-6">
-          <LearningImage searchQuery={promptImageQuery} alt="Question illustration" />
+          <LearningImage src={question.promptImageUrl} alt="Question illustration" />
         </div>
       )}
     </>
@@ -111,7 +109,7 @@ function ImageMultipleChoice(props: QuestionRendererProps) {
               label={label}
             >
               <LearningImage
-                searchQuery={buildVocabularyImageSearchQuery(option.text || option.accessibilityText || "")}
+                src={option.imageUrl}
                 alt={label}
                 className="aspect-square"
               />

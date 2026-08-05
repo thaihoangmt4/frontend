@@ -2,9 +2,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
-vi.mock("../use-learning-image", () => ({
-  useLearningImage: () => ({ image: null, isLoading: false, isUnavailable: true }),
-}));
 import { QuestionStepRenderer, type QuestionRendererProps } from "./question-step-renderer";
 import { question } from "../test-fixtures";
 import type { QuestionStep } from "../learning.types";
@@ -65,10 +62,32 @@ describe("QuestionStepRenderer", () => {
     expect(screen.getByRole("radio", { name: "orange. Incorrect answer" })).toBeDisabled();
   });
 
-  it("uses accessibility text when a provider image is unavailable", () => {
-    renderQuestion({ question: question("imageMultipleChoice") });
-    expect(screen.getByRole("img", { name: "A red apple. Image unavailable." })).toBeInTheDocument();
-    expect(document.querySelector('img[src="/apple.webp"]')).not.toBeInTheDocument();
+  it("renders backend option ImageUrls while preserving option ID and order", async () => {
+    const user = userEvent.setup();
+    const onSelectOption = vi.fn();
+    renderQuestion({ question: question("imageMultipleChoice"), onSelectOption });
+    const radios = screen.getAllByRole("radio");
+    expect(radios.map((radio) => radio.getAttribute("aria-label"))).toEqual(["A red apple", "An orange"]);
+    expect(screen.getByAltText("A red apple")).toHaveAttribute("src", "/apple.webp");
+    expect(screen.getByRole("img", { name: "An orange. Image unavailable." })).toBeInTheDocument();
+    await user.click(radios[0]);
+    expect(onSelectOption).toHaveBeenCalledWith("option-1");
+  });
+
+  it("renders promptImageUrl and makes no third-party image request", () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    renderQuestion({
+      question: {
+        ...question("textMultipleChoice"),
+        promptImageUrl: "/reviewed/prompts/apple.webp",
+      },
+    });
+    expect(screen.getByAltText("Question illustration")).toHaveAttribute(
+      "src",
+      "/reviewed/prompts/apple.webp",
+    );
+    expect(fetchSpy).not.toHaveBeenCalled();
+    fetchSpy.mockRestore();
   });
 
   it("ignores prompt audio URLs when no safe speech transcript exists", () => {

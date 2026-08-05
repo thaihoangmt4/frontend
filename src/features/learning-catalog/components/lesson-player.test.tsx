@@ -13,10 +13,6 @@ const { mutateAsync, reset, push, back } = vi.hoisted(() => ({
 }));
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push, back }) }));
-vi.mock("../use-learning-image-preload", () => ({ useLearningImagePreload: vi.fn() }));
-vi.mock("../use-learning-image", () => ({
-  useLearningImage: () => ({ image: null, isLoading: false, isUnavailable: true }),
-}));
 vi.mock("../learning.hooks", async (importOriginal) => {
   const original = await importOriginal<typeof import("../learning.hooks")>();
   return {

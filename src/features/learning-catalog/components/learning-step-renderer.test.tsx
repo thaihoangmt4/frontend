@@ -4,9 +4,6 @@ import { LearningStepRenderer } from "./learning-step-renderer";
 import { instructionStep, questionStep } from "../test-fixtures";
 import type { LearningStep } from "../learning.types";
 
-vi.mock("../use-learning-image", () => ({
-  useLearningImage: () => ({ image: null, isLoading: false, isUnavailable: true }),
-}));
 
 const handlers = {
   selectedOptionId: null,
