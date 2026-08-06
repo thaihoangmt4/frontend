@@ -1,7 +1,13 @@
 "use client";
 
 import { AlertDialog } from "@base-ui/react/alert-dialog";
-import { AlertTriangle, ArrowRight, BookOpen, RotateCcw, X } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  BookOpen,
+  RotateCcw,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,7 +19,6 @@ import type {
   QuestionStep,
 } from "../learning.types";
 import { useLessonPlayer } from "../use-lesson-player";
-import { useNextLearningAudioPreload } from "../use-next-learning-audio-preload";
 import { AnswerFeedback } from "./answer-feedback";
 import { LearningStepRenderer } from "./learning-step-renderer";
 
@@ -27,10 +32,6 @@ export function LessonPlayer({
   const evaluationMutation = useEvaluateQuestionMutation();
   const submissionInFlightRef = useRef(false);
   const stepContentRef = useRef<HTMLElement>(null);
-  useNextLearningAudioPreload(
-    learningFlow.steps[player.state.currentStepIndex],
-    learningFlow.steps[player.state.currentStepIndex + 1],
-  );
 
   useEffect(() => {
     if (player.state.currentStepIndex > 0) stepContentRef.current?.focus();
@@ -82,12 +83,18 @@ export function LessonPlayer({
 
   if (player.state.phase === "completed") {
     return (
-      <section className="mx-auto flex min-h-[70vh] max-w-4xl items-center justify-center rounded-2xl border border-neutral-200 bg-white p-6 text-center shadow-sm dark:border-neutral-800 dark:bg-neutral-900" aria-labelledby="lesson-complete-heading">
+      <section
+        className="mx-auto flex min-h-[70vh] max-w-4xl items-center justify-center rounded-2xl border border-neutral-200 bg-white p-6 text-center shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+        aria-labelledby="lesson-complete-heading"
+      >
         <div className="max-w-md">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
             <BookOpen aria-hidden="true" className="h-8 w-8" />
           </div>
-          <h1 id="lesson-complete-heading" className="mt-5 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+          <h1
+            id="lesson-complete-heading"
+            className="mt-5 text-2xl font-bold text-neutral-900 dark:text-neutral-100"
+          >
             Lesson complete
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
@@ -98,7 +105,14 @@ export function LessonPlayer({
             correctCount={player.state.correctAnswerCount}
           />
           <div className="flex flex-wrap justify-center gap-3">
-            <Button type="button" variant="outline" size="lg" onClick={() => router.push("/courses")}>Back to courses</Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={() => router.push("/courses")}
+            >
+              Back to courses
+            </Button>
             <Button type="button" size="lg" onClick={restartLesson}>
               <RotateCcw aria-hidden="true" /> Restart lesson
             </Button>
@@ -109,7 +123,10 @@ export function LessonPlayer({
   }
 
   return (
-    <section className="mx-auto flex min-h-[70vh] max-w-4xl flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900" aria-labelledby="lesson-player-heading">
+    <section
+      className="mx-auto flex min-h-[70vh] max-w-4xl flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+      aria-labelledby="lesson-player-heading"
+    >
       <LessonPlayerHeader
         currentStep={player.state.currentStepIndex + 1}
         totalSteps={learningFlow.steps.length}
@@ -117,26 +134,40 @@ export function LessonPlayer({
         isSubmitting={player.state.phase === "submitting"}
         onLeave={() => router.back()}
       />
-      <main ref={stepContentRef} tabIndex={-1} className="flex flex-1 items-center justify-center px-5 py-10 outline-none sm:px-10">
+      <main
+        ref={stepContentRef}
+        tabIndex={-1}
+        className="flex flex-1 items-center justify-center px-5 py-10 outline-none sm:px-10"
+      >
         <LearningStepRenderer
           step={player.currentStep}
           selectedOptionId={player.state.answerDraft.selectedOptionId}
           textAnswer={player.state.answerDraft.textAnswer}
-          disabled={player.state.phase === "submitting" || player.state.phase === "feedback"}
+          disabled={
+            player.state.phase === "submitting" ||
+            player.state.phase === "feedback"
+          }
           feedback={player.state.feedback}
           onSelectOption={player.selectOption}
           onTextAnswerChange={player.setTextAnswer}
           onSubmit={submitAnswer}
-          errorMessageId={player.state.evaluationError ? "evaluation-error" : undefined}
+          errorMessageId={
+            player.state.evaluationError ? "evaluation-error" : undefined
+          }
         />
       </main>
       <LessonPlayerFooter
         isQuestion={isEvaluableQuestion(player.currentStep.question)}
-        isLastStep={player.state.currentStepIndex === learningFlow.steps.length - 1}
+        isLastStep={
+          player.state.currentStepIndex === learningFlow.steps.length - 1
+        }
         phase={player.state.phase}
         canSubmit={
           player.currentStep.question
-            ? hasValidAnswer(player.currentStep.question, player.state.answerDraft)
+            ? hasValidAnswer(
+                player.currentStep.question,
+                player.state.answerDraft,
+              )
             : false
         }
         feedback={player.state.feedback}
@@ -148,24 +179,51 @@ export function LessonPlayer({
   );
 }
 
-function LessonPlayerHeader({ currentStep, totalSteps, progress, isSubmitting, onLeave }: { currentStep: number; totalSteps: number; progress: number; isSubmitting: boolean; onLeave: () => void }) {
+function LessonPlayerHeader({
+  currentStep,
+  totalSteps,
+  progress,
+  isSubmitting,
+  onLeave,
+}: {
+  currentStep: number;
+  totalSteps: number;
+  progress: number;
+  isSubmitting: boolean;
+  onLeave: () => void;
+}) {
   return (
     <header className="flex items-center gap-4 border-b border-neutral-100 px-4 py-4 sm:px-6 dark:border-neutral-800">
       <AlertDialog.Root>
-        <AlertDialog.Trigger aria-label="Exit lesson" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-neutral-500 outline-none transition hover:bg-neutral-100 hover:text-neutral-900 focus-visible:ring-3 focus-visible:ring-blue-500/30 dark:hover:bg-neutral-800 dark:hover:text-neutral-100">
+        <AlertDialog.Trigger
+          aria-label="Exit lesson"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-neutral-500 outline-none transition hover:bg-neutral-100 hover:text-neutral-900 focus-visible:ring-3 focus-visible:ring-blue-500/30 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+        >
           <X aria-hidden="true" className="h-5 w-5" />
         </AlertDialog.Trigger>
         <AlertDialog.Portal>
           <AlertDialog.Backdrop className="fixed inset-0 z-50 bg-black/45 backdrop-blur-[1px]" />
           <AlertDialog.Viewport className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <AlertDialog.Popup className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl outline-none dark:bg-neutral-900">
-              <AlertDialog.Title className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Leave this lesson?</AlertDialog.Title>
+              <AlertDialog.Title className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                Leave this lesson?
+              </AlertDialog.Title>
               <AlertDialog.Description className="mt-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
-                {isSubmitting ? "Please wait while your answer is being checked. Your current progress is not saved yet." : "Your current progress will not be saved."}
+                {isSubmitting
+                  ? "Please wait while your answer is being checked. Your current progress is not saved yet."
+                  : "Your current progress will not be saved."}
               </AlertDialog.Description>
               <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <AlertDialog.Close className="inline-flex h-11 items-center justify-center rounded-lg border border-neutral-200 px-4 text-sm font-medium outline-none hover:bg-neutral-50 focus-visible:ring-3 focus-visible:ring-blue-500/30 dark:border-neutral-700 dark:hover:bg-neutral-800">Keep learning</AlertDialog.Close>
-                <AlertDialog.Close disabled={isSubmitting} onClick={onLeave} className="inline-flex h-11 items-center justify-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white outline-none hover:bg-red-700 focus-visible:ring-3 focus-visible:ring-red-500/30 disabled:cursor-not-allowed disabled:opacity-50">Leave lesson</AlertDialog.Close>
+                <AlertDialog.Close className="inline-flex h-11 items-center justify-center rounded-lg border border-neutral-200 px-4 text-sm font-medium outline-none hover:bg-neutral-50 focus-visible:ring-3 focus-visible:ring-blue-500/30 dark:border-neutral-700 dark:hover:bg-neutral-800">
+                  Keep learning
+                </AlertDialog.Close>
+                <AlertDialog.Close
+                  disabled={isSubmitting}
+                  onClick={onLeave}
+                  className="inline-flex h-11 items-center justify-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white outline-none hover:bg-red-700 focus-visible:ring-3 focus-visible:ring-red-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Leave lesson
+                </AlertDialog.Close>
               </div>
             </AlertDialog.Popup>
           </AlertDialog.Viewport>
@@ -174,10 +232,22 @@ function LessonPlayerHeader({ currentStep, totalSteps, progress, isSubmitting, o
       <div className="min-w-0 flex-1">
         <div className="mb-2 flex items-center justify-between gap-3 text-xs font-semibold text-neutral-500 dark:text-neutral-400">
           <span>Lesson progress</span>
-          <span>Step {currentStep} of {totalSteps}</span>
+          <span>
+            Step {currentStep} of {totalSteps}
+          </span>
         </div>
-        <div role="progressbar" aria-label={`Lesson progress: step ${currentStep} of ${totalSteps}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} className="h-3 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
-          <div className="h-full rounded-full bg-blue-600 transition-[width] duration-300" style={{ width: `${progress}%` }} />
+        <div
+          role="progressbar"
+          aria-label={`Lesson progress: step ${currentStep} of ${totalSteps}`}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progress}
+          className="h-3 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800"
+        >
+          <div
+            className="h-full rounded-full bg-blue-600 transition-[width] duration-300"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
     </header>
@@ -219,8 +289,15 @@ function LessonPlayerFooter({
       <div className="mx-auto max-w-2xl">
         {hasFeedback && <AnswerFeedback feedback={feedback} />}
         {evaluationError && (
-          <div id="evaluation-error" role="alert" className="mb-4 flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200">
-            <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
+          <div
+            id="evaluation-error"
+            role="alert"
+            className="mb-4 flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200"
+          >
+            <AlertTriangle
+              aria-hidden="true"
+              className="mt-0.5 h-4 w-4 shrink-0"
+            />
             <span>{evaluationError} Your answer is still selected.</span>
           </div>
         )}
@@ -241,23 +318,40 @@ function LessonPlayerFooter({
   );
 }
 
-function CompletionScore({ answeredCount, correctCount }: { answeredCount: number; correctCount: number }) {
-  const accuracy = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : null;
+function CompletionScore({
+  answeredCount,
+  correctCount,
+}: {
+  answeredCount: number;
+  correctCount: number;
+}) {
+  const accuracy =
+    answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : null;
   return (
     <dl className="my-6 grid grid-cols-2 gap-3">
       <div className="rounded-xl bg-neutral-100 p-4 dark:bg-neutral-800">
-        <dt className="text-xs font-semibold text-neutral-500 dark:text-neutral-400">Correct answers</dt>
-        <dd className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">{correctCount} / {answeredCount}</dd>
+        <dt className="text-xs font-semibold text-neutral-500 dark:text-neutral-400">
+          Correct answers
+        </dt>
+        <dd className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+          {correctCount} / {answeredCount}
+        </dd>
       </div>
       <div className="rounded-xl bg-neutral-100 p-4 dark:bg-neutral-800">
-        <dt className="text-xs font-semibold text-neutral-500 dark:text-neutral-400">Accuracy</dt>
-        <dd className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">{accuracy === null ? "—" : `${accuracy}%`}</dd>
+        <dt className="text-xs font-semibold text-neutral-500 dark:text-neutral-400">
+          Accuracy
+        </dt>
+        <dd className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+          {accuracy === null ? "—" : `${accuracy}%`}
+        </dd>
       </div>
     </dl>
   );
 }
 
-function isEvaluableQuestion(question: QuestionStep | null): question is QuestionStep {
+function isEvaluableQuestion(
+  question: QuestionStep | null,
+): question is QuestionStep {
   if (!question) return false;
   switch (question.type) {
     case "textInput":

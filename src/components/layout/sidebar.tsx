@@ -3,13 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  LayoutDashboard,
-  BookOpen,
-  MessageSquareText,
-  UserRound,
-  type LucideIcon,
-} from "lucide-react";
+import { LayoutDashboard, UserRound, type LucideIcon } from "lucide-react";
 
 // ── Navigation Config ──
 
@@ -20,10 +14,8 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Home", href: "/dashboard", icon: LayoutDashboard },
   { label: "Profile", href: "/profile", icon: UserRound },
-  { label: "Courses", href: "/courses", icon: BookOpen },
-  { label: "Practice", href: "#", icon: MessageSquareText },
 ];
 
 // ── Props ──
