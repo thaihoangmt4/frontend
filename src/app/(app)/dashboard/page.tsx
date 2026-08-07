@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { HomeLearningCard } from "@/features/exercise-player";
+import { HomeContinueLearning } from "@/features/learning-progress";
 export const metadata: Metadata = {
   title: "Home — AI English Learning Platform",
 };
@@ -12,7 +12,7 @@ export default function DashboardPage() {
           Keep building your English skills, one activity at a time.
         </p>
       </div>
-      <HomeLearningCard />
+      <HomeContinueLearning />
     </div>
   );
 }

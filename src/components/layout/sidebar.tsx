@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, UserRound, type LucideIcon } from "lucide-react";
+import { History, LayoutDashboard, Map, UserRound, type LucideIcon } from "lucide-react";
 
 // ── Navigation Config ──
 
@@ -15,6 +15,8 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { label: "Home", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Learning Progress", href: "/progress", icon: Map },
+  { label: "Learning History", href: "/history", icon: History },
   { label: "Profile", href: "/profile", icon: UserRound },
 ];
 

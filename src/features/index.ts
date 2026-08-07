@@ -3,4 +3,4 @@
 // Export feature entry points from this barrel file as they are added.
 
 export * from "./profile";
-export * from "./learning-catalog";
+export * from "./learning-progress";

@@ -2,18 +2,11 @@ import { axiosClient } from "@/lib/axios";
 import type {
   ExerciseAnswer,
   LessonAttemptPlayerResponse,
-  StartLearningSessionResponse,
   SubmitActivityAnswerResponse,
 } from "./types";
 
 const API = "/api/v1";
 export const exercisePlayerService = {
-  async startOrContinue(): Promise<StartLearningSessionResponse> {
-    const { data } = await axiosClient.post<StartLearningSessionResponse>(
-      `${API}/learning-sessions`,
-    );
-    return data;
-  },
   async getAttempt(
     id: string,
     signal?: AbortSignal,

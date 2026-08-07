@@ -2,6 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { exercisePlayerService } from "./service";
 import type { ExerciseAnswer } from "./types";
+import { learningProgressKeys } from "@/features/learning-progress/hooks";
 
 export const attemptKeys = {
   detail: (id: string) => ["lesson-attempt", id] as const,
@@ -12,11 +13,6 @@ export function useAttempt(id: string) {
     queryFn: ({ signal }) => exercisePlayerService.getAttempt(id, signal),
     enabled: Boolean(id),
     staleTime: 0,
-  });
-}
-export function useStartLearning() {
-  return useMutation({
-    mutationFn: () => exercisePlayerService.startOrContinue(),
   });
 }
 export function useSubmitActivity(attemptId: string) {
@@ -35,9 +31,11 @@ export function useSubmitActivity(attemptId: string) {
         v.submissionId,
         v.answer,
       ),
-    onSuccess: () =>
-      queryClient.invalidateQueries({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
         queryKey: attemptKeys.detail(attemptId),
-      }),
+      });
+      await queryClient.invalidateQueries({ queryKey: learningProgressKeys.all });
+    },
   });
 }

@@ -10,7 +10,8 @@ import {
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useStartLearning, useSubmitActivity } from "../hooks";
+import { useSubmitActivity } from "../hooks";
+import { useLearningSession } from "@/features/learning-progress/hooks";
 import type {
   ExerciseAnswer,
   LessonAttemptPlayerResponse,
@@ -25,7 +26,7 @@ export function ExercisePlayer({
 }) {
   const router = useRouter();
   const submit = useSubmitActivity(initialAttempt.attempt.id);
-  const startNext = useStartLearning();
+  const startNext = useLearningSession();
   const [attempt, setAttempt] = useState(initialAttempt);
   const [activityId, setActivityId] = useState(
     initialAttempt.attempt.currentActivityId ??
@@ -73,15 +74,14 @@ export function ExercisePlayer({
     setSubmissionId(crypto.randomUUID());
     if (nextId) setActivityId(nextId);
   }
-  function retry() {
-    setFeedback(null);
-    submit.reset();
-    setSubmissionId(crypto.randomUUID());
-  }
   async function continueLearning() {
-    const next = await startNext.mutateAsync();
-    if (next.lessonAttemptId) router.replace(`/learn/${next.lessonAttemptId}`);
-    else router.replace("/dashboard");
+    try {
+      const next = await startNext.mutateAsync();
+      router.replace(`/learn/${next.session.attempt.id}`);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 409)
+        router.replace("/progress");
+    }
   }
   if (completed)
     return (
@@ -142,7 +142,7 @@ export function ExercisePlayer({
           </p>
           <h2 className="mt-2 mb-7 text-2xl font-bold">{activity.title}</h2>
           {feedback ? (
-            <Feedback result={feedback} onContinue={advance} onRetry={retry} />
+            <Feedback result={feedback} onContinue={advance} />
           ) : (
             <ExerciseInput
               key={activity.activityId}
@@ -165,11 +165,9 @@ export function ExercisePlayer({
 function Feedback({
   result,
   onContinue,
-  onRetry,
 }: {
   result: SubmitActivityAnswerResponse;
   onContinue: () => void;
-  onRetry: () => void;
 }) {
   const correct = result.evaluation.status === "Correct",
     partial = result.evaluation.status === "PartiallyCorrect";
@@ -205,16 +203,6 @@ function Feedback({
         </div>
       </div>
       <div className="mt-6 flex flex-wrap gap-3">
-        {!correct && result.evaluation.status !== "NotEvaluated" && (
-          <Button
-            className="min-h-11"
-            size="lg"
-            variant="outline"
-            onClick={onRetry}
-          >
-            <RotateCcw /> Try again
-          </Button>
-        )}
         <Button className="min-h-11" size="lg" onClick={onContinue}>
           Continue <ArrowRight />
         </Button>

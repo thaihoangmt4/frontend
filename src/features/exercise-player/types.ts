@@ -71,11 +71,6 @@ export type LessonAttemptPlayerResponse = {
   lesson: { id: string; title: string; description: string | null };
   activities: LearningActivity[];
 };
-export type StartLearningSessionResponse = {
-  status: "Started" | "Resumed" | "PathCompleted" | "NoPublishedContent";
-  lessonAttemptId: string | null;
-  lessonId: string | null;
-};
 export type ExerciseAnswer =
   | { selectedOptionId: string }
   | { text: string }
