@@ -4,6 +4,7 @@ const assetsHostname =
   process.env.NEXT_PUBLIC_ASSETS_HOSTNAME?.trim() || "assets.example.com";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   images: {
     remotePatterns: [
       {
