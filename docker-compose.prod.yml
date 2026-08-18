@@ -8,5 +8,5 @@ services:
       HOSTNAME: 0.0.0.0
       PORT: 3000
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "127.0.0.1:3000:3000"
     restart: unless-stopped
