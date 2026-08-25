@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Map,
   ScrollText,
+  Settings2,
   UserRound,
   type LucideIcon,
 } from "lucide-react";
@@ -32,6 +33,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "System Logs",
     href: "/admin/system-logs",
     icon: ScrollText,
+    adminOnly: true,
+  },
+  {
+    label: "Generation Settings",
+    href: "/admin/settings/exercise-generation",
+    icon: Settings2,
     adminOnly: true,
   },
 ];
