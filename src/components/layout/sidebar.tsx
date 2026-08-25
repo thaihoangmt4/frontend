@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { History, LayoutDashboard, Map, UserRound, type LucideIcon } from "lucide-react";
+import {
+  History,
+  LayoutDashboard,
+  Map,
+  ScrollText,
+  UserRound,
+  type LucideIcon,
+} from "lucide-react";
+import { useAuthStore } from "@/stores/auth.store";
+import { getUserFromToken } from "@/utils/jwt";
 
 // ── Navigation Config ──
 
@@ -11,6 +20,7 @@ type NavItem = {
   label: string;
   href: string;
   icon: LucideIcon;
+  adminOnly?: boolean;
 };
 
 const NAV_ITEMS: NavItem[] = [
@@ -18,6 +28,12 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Learning Progress", href: "/progress", icon: Map },
   { label: "Learning History", href: "/history", icon: History },
   { label: "Profile", href: "/profile", icon: UserRound },
+  {
+    label: "System Logs",
+    href: "/admin/system-logs",
+    icon: ScrollText,
+    adminOnly: true,
+  },
 ];
 
 // ── Props ──
@@ -29,6 +45,10 @@ type Props = {
 
 export function Sidebar({ open, onClose }: Props) {
   const pathname = usePathname();
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const isAdmin = accessToken
+    ? getUserFromToken(accessToken)?.role.toLowerCase() === "admin"
+    : false;
 
   return (
     <>
@@ -61,40 +81,42 @@ export function Sidebar({ open, onClose }: Props) {
 
         {/* ── Navigation ── */}
         <nav className="flex-1 space-y-1 px-3 py-4">
-          {NAV_ITEMS.map((item) => {
-            const isActive =
-              item.href !== "#" && pathname.startsWith(item.href);
-            const isPlaceholder = item.href === "#";
+          {NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map(
+            (item) => {
+              const isActive =
+                item.href !== "#" && pathname.startsWith(item.href);
+              const isPlaceholder = item.href === "#";
 
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                onClick={(e) => {
-                  if (isPlaceholder) e.preventDefault();
-                  if (!isPlaceholder) onClose();
-                }}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium",
-                  isActive &&
-                    "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
-                  isPlaceholder &&
-                    "cursor-default text-neutral-400 dark:text-neutral-600",
-                  !isActive &&
-                    !isPlaceholder &&
-                    "text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-900",
-                )}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                {item.label}
-                {isPlaceholder && (
-                  <span className="ml-auto text-[10px] uppercase tracking-wider text-neutral-300 dark:text-neutral-700">
-                    Soon
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={(e) => {
+                    if (isPlaceholder) e.preventDefault();
+                    if (!isPlaceholder) onClose();
+                  }}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium",
+                    isActive &&
+                      "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+                    isPlaceholder &&
+                      "cursor-default text-neutral-400 dark:text-neutral-600",
+                    !isActive &&
+                      !isPlaceholder &&
+                      "text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-900",
+                  )}
+                >
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  {item.label}
+                  {isPlaceholder && (
+                    <span className="ml-auto text-[10px] uppercase tracking-wider text-neutral-300 dark:text-neutral-700">
+                      Soon
+                    </span>
+                  )}
+                </Link>
+              );
+            },
+          )}
         </nav>
 
         {/* ── Footer ── */}
