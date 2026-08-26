@@ -36,8 +36,8 @@ const NAV_ITEMS: NavItem[] = [
     adminOnly: true,
   },
   {
-    label: "Generation Settings",
-    href: "/admin/settings/exercise-generation",
+    label: "Settings",
+    href: "/admin/settings",
     icon: Settings2,
     adminOnly: true,
   },

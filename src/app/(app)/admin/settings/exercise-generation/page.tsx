@@ -1,10 +1,5 @@
-import { AdminRoute } from "@/components/auth";
-import { ExerciseGenerationSettingsPage } from "@/features/admin-exercise-generation-settings";
+import { redirect } from "next/navigation";
 
 export default function ExerciseGenerationSettingsRoute() {
-  return (
-    <AdminRoute>
-      <ExerciseGenerationSettingsPage />
-    </AdminRoute>
-  );
+  redirect("/admin/settings");
 }

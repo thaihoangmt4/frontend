@@ -66,13 +66,18 @@ export function ExerciseGenerationSettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <section
+      className="space-y-5"
+      aria-labelledby="exercise-generation-heading"
+    >
       <header>
-        <p className="text-sm font-medium text-primary">Administration</p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          Exercise Generation Settings
-        </h1>
-        <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+        <h2
+          id="exercise-generation-heading"
+          className="text-xl font-semibold tracking-tight"
+        >
+          Exercise Generation
+        </h2>
+        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
           Controls how the background exercise-generation process schedules work
           and replenishes exercise inventory.
         </p>
@@ -82,7 +87,7 @@ export function ExerciseGenerationSettingsPage() {
         settings={query.data}
         reloadLatest={async () => (await query.refetch()).data}
       />
-    </div>
+    </section>
   );
 }
 
@@ -456,7 +461,7 @@ function SettingsMetadata({
 function SettingsSkeleton() {
   return (
     <div
-      className="mx-auto max-w-5xl space-y-5"
+      className="space-y-5"
       role="status"
       aria-label="Loading exercise generation settings"
     >

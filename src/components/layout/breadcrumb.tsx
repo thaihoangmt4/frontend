@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 // ── Route label map ──
 
 const LABEL_MAP: Record<string, string> = {
+  admin: "Admin",
   dashboard: "Dashboard",
   lessons: "Lessons",
   practice: "Practice",
@@ -23,8 +24,7 @@ export function Breadcrumb() {
   const crumbs = segments.map((segment, index) => {
     const href = "/" + segments.slice(0, index + 1).join("/");
     const label =
-      LABEL_MAP[segment] ??
-      segment.charAt(0).toUpperCase() + segment.slice(1);
+      LABEL_MAP[segment] ?? segment.charAt(0).toUpperCase() + segment.slice(1);
     const isLast = index === segments.length - 1;
 
     return { href, label, isLast };
