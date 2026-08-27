@@ -280,21 +280,6 @@ function ExerciseGenerationSettingsForm({
             })}
           />
         </SettingField>
-
-        <SettingField
-          id="generationBatchSize"
-          label="Generation Batch Size"
-          description="Maximum number of exercises requested from the generator in each batch."
-          error={errors.generationBatchSize?.message}
-        >
-          <NumericInput
-            id="generationBatchSize"
-            min={1}
-            max={50}
-            invalid={Boolean(errors.generationBatchSize)}
-            register={register("generationBatchSize", { valueAsNumber: true })}
-          />
-        </SettingField>
       </SettingsSection>
 
       <aside className="flex gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
@@ -506,7 +491,6 @@ function toFormValues(
     minimumExerciseThreshold: settings.minimumExerciseThreshold,
     targetExerciseCount: settings.targetExerciseCount,
     maxExercisesPerLessonPerRun: settings.maxExercisesPerLessonPerRun,
-    generationBatchSize: settings.generationBatchSize,
   };
 }
 
@@ -551,7 +535,6 @@ function applyBackendFieldErrors(
     minimumexercisethreshold: "minimumExerciseThreshold",
     targetexercisecount: "targetExerciseCount",
     maxexercisesperlessonperrun: "maxExercisesPerLessonPerRun",
-    generationbatchsize: "generationBatchSize",
   };
 
   let mapped = false;

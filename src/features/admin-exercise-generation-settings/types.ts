@@ -4,7 +4,6 @@ export type ExerciseGenerationSettings = {
   minimumExerciseThreshold: number;
   targetExerciseCount: number;
   maxExercisesPerLessonPerRun: number;
-  generationBatchSize: number;
   updatedAtUtc: string;
   updatedByUserId: string | null;
   version: string;
@@ -17,7 +16,6 @@ export type ExerciseGenerationSettingsValues = Pick<
   | "minimumExerciseThreshold"
   | "targetExerciseCount"
   | "maxExercisesPerLessonPerRun"
-  | "generationBatchSize"
 >;
 
 export type UpdateExerciseGenerationSettingsRequest =

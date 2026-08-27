@@ -5,6 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { adminLogsService } from "./service";
 import type { AdminLogFilters } from "./types";
+import { env } from "@/config/env";
 
 export const adminLogKeys = {
   all: ["admin-logs"] as const,
@@ -25,6 +26,7 @@ export function useAdminLogs(filters: AdminLogFilters, autoRefresh: boolean) {
     refetchInterval: autoRefresh ? 7_500 : false,
     refetchIntervalInBackground: false,
     retry: (failureCount, error) => {
+      if (env.IS_DEVELOPMENT) return false;
       if (
         axios.isAxiosError(error) &&
         (error.response?.status === 401 || error.response?.status === 403)

@@ -7,6 +7,9 @@
  */
 
 export const env = {
+  /** True only for local Next.js development builds. */
+  IS_DEVELOPMENT: process.env.NODE_ENV === "development",
+
   /** Base URL for the backend API (no trailing slash). */
   API_BASE_URL:
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",

@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { exerciseGenerationSettingsService } from "./service";
 import type { UpdateExerciseGenerationSettingsRequest } from "./types";
+import { env } from "@/config/env";
 
 export const exerciseGenerationSettingsKey = [
   "admin",
@@ -16,6 +17,7 @@ export function useExerciseGenerationSettings() {
     queryKey: exerciseGenerationSettingsKey,
     queryFn: ({ signal }) => exerciseGenerationSettingsService.get(signal),
     retry: (failureCount, error) => {
+      if (env.IS_DEVELOPMENT) return false;
       if (
         axios.isAxiosError(error) &&
         (error.response?.status === 401 || error.response?.status === 403)

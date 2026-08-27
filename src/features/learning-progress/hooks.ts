@@ -2,6 +2,7 @@
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { learningProgressService } from "./service";
+import { env } from "@/config/env";
 
 export const learningProgressKeys = {
   all: ["learning-progress"] as const,
@@ -16,6 +17,7 @@ export function useLearningProgress() { return useQuery({
   queryKey: learningProgressKeys.progress(),
   queryFn: ({ signal }) => learningProgressService.progress(signal),
   retry: (failureCount, error) => {
+    if (env.IS_DEVELOPMENT) return false;
     if (axios.isAxiosError(error) && error.response && error.response.status < 500) return false;
     return failureCount < 2;
   },

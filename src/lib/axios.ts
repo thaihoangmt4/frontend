@@ -8,7 +8,9 @@ export const axiosClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
+  // Browser aborts flow into ASP.NET Core's RequestAborted token. Keep the
+  // production deadline, but allow long Visual Studio breakpoint pauses.
+  timeout: env.IS_DEVELOPMENT ? 0 : 10000,
 });
 
 // ── Request interceptor: attach access token ──

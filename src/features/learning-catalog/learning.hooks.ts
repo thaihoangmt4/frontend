@@ -5,6 +5,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { isNotFoundError } from "./errors";
 import { learningService } from "./learning.service";
 import type { EvaluateQuestionRequest } from "./learning.types";
+import { env } from "@/config/env";
 
 const LEARNING_FLOW_STALE_TIME = 30 * 60 * 1000;
 const GUID_PATTERN =
@@ -33,7 +34,8 @@ export function useLessonLearningFlowQuery(lessonId: string) {
       !isLoading && isAuthenticated && isValidLessonId(normalizedLessonId),
     staleTime: LEARNING_FLOW_STALE_TIME,
     refetchOnWindowFocus: false,
-    retry: (failureCount, error) => !isNotFoundError(error) && failureCount < 1,
+    retry: (failureCount, error) =>
+      !env.IS_DEVELOPMENT && !isNotFoundError(error) && failureCount < 1,
   });
 }
 

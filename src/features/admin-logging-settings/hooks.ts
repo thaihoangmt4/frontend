@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { systemSettingsService } from "./service";
 import type { UpdateSystemSettingsRequest } from "./types";
+import { env } from "@/config/env";
 
 export const systemSettingsKey = ["admin", "system", "settings"] as const;
 
@@ -12,6 +13,7 @@ export function useSystemSettings() {
     queryKey: systemSettingsKey,
     queryFn: ({ signal }) => systemSettingsService.get(signal),
     retry: (failureCount, error) => {
+      if (env.IS_DEVELOPMENT) return false;
       if (
         axios.isAxiosError(error) &&
         (error.response?.status === 401 || error.response?.status === 403)

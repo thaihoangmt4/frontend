@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/auth.store";
 import { isNotFoundError } from "./errors";
 import { learningCatalogService } from "./learning-catalog.service";
+import { env } from "@/config/env";
 
 export const courseKeys = {
   all: ["courses"] as const,
@@ -36,7 +37,8 @@ export function useCourseDetailQuery(courseId: string) {
     queryFn: ({ signal }) =>
       learningCatalogService.getCourseById(courseId, signal),
     enabled: !isLoading && isAuthenticated && courseId.length > 0,
-    retry: (failureCount, error) => !isNotFoundError(error) && failureCount < 1,
+    retry: (failureCount, error) =>
+      !env.IS_DEVELOPMENT && !isNotFoundError(error) && failureCount < 1,
   });
 }
 
@@ -49,6 +51,7 @@ export function useLessonDetailQuery(lessonId: string) {
     queryFn: ({ signal }) =>
       learningCatalogService.getLessonById(lessonId, signal),
     enabled: !isLoading && isAuthenticated && lessonId.length > 0,
-    retry: (failureCount, error) => !isNotFoundError(error) && failureCount < 1,
+    retry: (failureCount, error) =>
+      !env.IS_DEVELOPMENT && !isNotFoundError(error) && failureCount < 1,
   });
 }

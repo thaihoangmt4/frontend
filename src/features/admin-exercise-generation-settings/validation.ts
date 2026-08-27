@@ -18,7 +18,6 @@ export const exerciseGenerationSettingsSchema = z
       1,
       200,
     ),
-    generationBatchSize: integer("Generation batch size", 1, 50),
   })
   .refine(
     (values) => values.targetExerciseCount >= values.minimumExerciseThreshold,

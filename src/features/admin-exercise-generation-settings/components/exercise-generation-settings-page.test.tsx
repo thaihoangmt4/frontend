@@ -29,7 +29,6 @@ const SETTINGS: ExerciseGenerationSettings = {
   minimumExerciseThreshold: 20,
   targetExerciseCount: 40,
   maxExercisesPerLessonPerRun: 50,
-  generationBatchSize: 20,
   updatedAtUtc: "2026-08-25T10:10:00Z",
   updatedByUserId: "d5ae49a6-fd75-4c30-b833-c85640f59dbc",
   version: "22df927c-1938-443e-8567-3485882eec41",
@@ -70,7 +69,7 @@ describe("ExerciseGenerationSettingsPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("populates authoritative values and disables Save without changes", () => {
+  it("loads the five authoritative settings and omits the removed field", () => {
     render(<ExerciseGenerationSettingsPage />);
 
     expect(screen.getByLabelText("Initial Delay Minutes")).toHaveValue(10);
@@ -80,7 +79,9 @@ describe("ExerciseGenerationSettingsPage", () => {
     expect(
       screen.getByLabelText("Maximum Exercises Per Lesson Per Run"),
     ).toHaveValue(50);
-    expect(screen.getByLabelText("Generation Batch Size")).toHaveValue(20);
+    expect(
+      screen.queryByLabelText("Generation Batch Size"),
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Save settings" }),
     ).toBeDisabled();
@@ -133,9 +134,11 @@ describe("ExerciseGenerationSettingsPage", () => {
         minimumExerciseThreshold: 20,
         targetExerciseCount: 40,
         maxExercisesPerLessonPerRun: 50,
-        generationBatchSize: 20,
         version: SETTINGS.version,
       }),
+    );
+    expect(mutateAsync.mock.calls[0][0]).not.toHaveProperty(
+      "generationBatchSize",
     );
     expect(await screen.findByLabelText("Interval Hours")).toHaveValue(12);
     expect(toastSuccess).toHaveBeenCalledWith(
