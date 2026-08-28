@@ -24,6 +24,7 @@ vi.mock("@/hooks/useToast", () => ({
 }));
 
 const SETTINGS: ExerciseGenerationSettings = {
+  enabled: true,
   initialDelayMinutes: 10,
   intervalHours: 24,
   minimumExerciseThreshold: 20,
@@ -69,9 +70,16 @@ describe("ExerciseGenerationSettingsPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("loads the five authoritative settings and omits the removed field", () => {
+  it("loads the enabled state and five authoritative numeric settings", () => {
     render(<ExerciseGenerationSettingsPage />);
 
+    expect(
+      screen.getByRole("switch", { name: "AI Exercise Generation" }),
+    ).toBeChecked();
+    expect(screen.getByText("Enabled")).toBeInTheDocument();
+    expect(
+      screen.getByText("Scheduled AI exercise generation is active."),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText("Initial Delay Minutes")).toHaveValue(10);
     expect(screen.getByLabelText("Interval Hours")).toHaveValue(24);
     expect(screen.getByLabelText("Minimum Exercise Threshold")).toHaveValue(20);
@@ -98,6 +106,76 @@ describe("ExerciseGenerationSettingsPage", () => {
         screen.getByRole("button", { name: "Save settings" }),
       ).toBeEnabled(),
     );
+  });
+
+  it("renders the disabled state from the GET response", () => {
+    mockSettings({ ...SETTINGS, enabled: false });
+
+    render(<ExerciseGenerationSettingsPage />);
+
+    expect(
+      screen.getByRole("switch", { name: "AI Exercise Generation" }),
+    ).not.toBeChecked();
+    expect(screen.getByText("Disabled")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Scheduled AI exercise generation is paused. Existing exercises remain available to learners.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("asks for confirmation before disabling and Cancel keeps it enabled", async () => {
+    const user = userEvent.setup();
+    render(<ExerciseGenerationSettingsPage />);
+
+    await openDisableConfirmation(user);
+    expect(
+      screen.getByText(/Scheduled AI exercise generation will stop/),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(
+      screen.getByRole("switch", { name: "AI Exercise Generation" }),
+    ).toBeChecked();
+    expect(
+      screen.getByRole("button", { name: "Save settings" }),
+    ).toBeDisabled();
+  });
+
+  it("confirming Disable updates local form state without saving immediately", async () => {
+    const user = userEvent.setup();
+    render(<ExerciseGenerationSettingsPage />);
+
+    await openDisableConfirmation(user);
+    await user.click(screen.getByRole("button", { name: "Disable" }));
+
+    expect(
+      screen.getByRole("switch", { name: "AI Exercise Generation" }),
+    ).not.toBeChecked();
+    expect(screen.getByText("Pending save")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save settings" })).toBeEnabled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
+  it("enables generation without a confirmation dialog", async () => {
+    const user = userEvent.setup();
+    mockSettings({ ...SETTINGS, enabled: false });
+    render(<ExerciseGenerationSettingsPage />);
+
+    await user.click(
+      screen.getByRole("switch", { name: "AI Exercise Generation" }),
+    );
+
+    expect(
+      screen.getByRole("switch", { name: "AI Exercise Generation" }),
+    ).toBeChecked();
+    expect(
+      screen.queryByRole("heading", {
+        name: "Disable AI Exercise Generation?",
+      }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save settings" })).toBeEnabled();
   });
 
   it("validates target count against the minimum threshold", async () => {
@@ -134,6 +212,7 @@ describe("ExerciseGenerationSettingsPage", () => {
         minimumExerciseThreshold: 20,
         targetExerciseCount: 40,
         maxExercisesPerLessonPerRun: 50,
+        enabled: true,
         version: SETTINGS.version,
       }),
     );
@@ -167,6 +246,63 @@ describe("ExerciseGenerationSettingsPage", () => {
     expect(
       await screen.findByText("Interval is not currently allowed."),
     ).toBeInTheDocument();
+  });
+
+  it("preserves the selected enabled state when the update fails", async () => {
+    const user = userEvent.setup();
+    mutateAsync.mockRejectedValue(new Error("unavailable"));
+    render(<ExerciseGenerationSettingsPage />);
+
+    await openDisableConfirmation(user);
+    await user.click(screen.getByRole("button", { name: "Disable" }));
+    await user.click(screen.getByRole("button", { name: "Save settings" }));
+
+    expect(
+      await screen.findByText(/We couldn’t save these settings/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("switch", { name: "AI Exercise Generation" }),
+    ).not.toBeChecked();
+    expect(screen.getByText("Pending save")).toBeInTheDocument();
+    expect(toastError).toHaveBeenCalled();
+  });
+
+  it("uses the authoritative update response after disabling", async () => {
+    const user = userEvent.setup();
+    const updated = { ...SETTINGS, enabled: false, version: "new-version" };
+    mutateAsync.mockResolvedValue(updated);
+    render(<ExerciseGenerationSettingsPage />);
+
+    await openDisableConfirmation(user);
+    await user.click(screen.getByRole("button", { name: "Disable" }));
+    await user.click(screen.getByRole("button", { name: "Save settings" }));
+
+    await waitFor(() =>
+      expect(mutateAsync).toHaveBeenCalledWith({
+        enabled: false,
+        initialDelayMinutes: 10,
+        intervalHours: 24,
+        minimumExerciseThreshold: 20,
+        targetExerciseCount: 40,
+        maxExercisesPerLessonPerRun: 50,
+        version: SETTINGS.version,
+      }),
+    );
+    expect(
+      screen.getByRole("switch", { name: "AI Exercise Generation" }),
+    ).not.toBeChecked();
+    expect(screen.queryByText("Pending save")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Scheduled AI exercise generation is paused. Existing exercises remain available to learners.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Save settings" }),
+    ).toBeDisabled();
+    expect(toastSuccess).toHaveBeenCalledWith(
+      "Exercise generation settings updated.",
+    );
   });
 
   it("shows access denied for a backend 403", () => {
@@ -238,4 +374,26 @@ async function replaceNumber(
   const input = screen.getByLabelText(label);
   await user.clear(input);
   await user.type(input, value);
+}
+
+function mockSettings(settings: ExerciseGenerationSettings) {
+  vi.mocked(useExerciseGenerationSettings).mockReturnValue({
+    data: settings,
+    isPending: false,
+    isError: false,
+    isFetching: false,
+    error: null,
+    refetch,
+  } as unknown as ReturnType<typeof useExerciseGenerationSettings>);
+}
+
+async function openDisableConfirmation(
+  user: ReturnType<typeof userEvent.setup>,
+) {
+  await user.click(
+    screen.getByRole("switch", { name: "AI Exercise Generation" }),
+  );
+  await screen.findByRole("heading", {
+    name: "Disable AI Exercise Generation?",
+  });
 }

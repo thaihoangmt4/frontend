@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AlertDialog } from "@base-ui/react/alert-dialog";
+import { Switch } from "@base-ui/react/switch";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import {
@@ -10,7 +12,7 @@ import {
   ShieldX,
   TriangleAlert,
 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -106,10 +108,11 @@ function ExerciseGenerationSettingsForm({
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     setError,
-    formState: { errors, isDirty, isValid },
+    formState: { dirtyFields, errors, isDirty, isValid },
   } = useForm<ExerciseGenerationSettingsFormValues>({
     resolver: zodResolver(exerciseGenerationSettingsSchema),
     defaultValues: toFormValues(settings),
@@ -177,6 +180,19 @@ function ExerciseGenerationSettingsForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-5">
+      <Controller
+        name="enabled"
+        control={control}
+        render={({ field }) => (
+          <ExerciseGenerationToggle
+            enabled={field.value}
+            hasUnsavedChange={Boolean(dirtyFields.enabled)}
+            disabled={mutation.isPending}
+            onEnabledChange={field.onChange}
+          />
+        )}
+      />
+
       <SettingsSection
         title="Generation Schedule"
         description="Controls when the background worker begins and repeats its scheduled work."
@@ -334,6 +350,116 @@ function ExerciseGenerationSettingsForm({
   );
 }
 
+function ExerciseGenerationToggle({
+  enabled,
+  hasUnsavedChange,
+  disabled,
+  onEnabledChange,
+}: {
+  enabled: boolean;
+  hasUnsavedChange: boolean;
+  disabled: boolean;
+  onEnabledChange: (enabled: boolean) => void;
+}) {
+  const [disableDialogOpen, setDisableDialogOpen] = useState(false);
+
+  const requestChange = (checked: boolean) => {
+    if (checked) {
+      onEnabledChange(true);
+      return;
+    }
+    setDisableDialogOpen(true);
+  };
+
+  return (
+    <section
+      className="rounded-xl border bg-card p-5 shadow-sm sm:p-6"
+      aria-labelledby="exercise-generation-enabled-label"
+    >
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <div className="max-w-2xl">
+          <h3 id="exercise-generation-enabled-label" className="font-semibold">
+            AI Exercise Generation
+          </h3>
+          <p
+            id="exercise-generation-enabled-description"
+            className="mt-1 text-sm text-muted-foreground"
+          >
+            Automatically generate exercises using the configured AI provider.
+            When disabled, scheduled AI generation will be skipped.
+          </p>
+        </div>
+
+        <Switch.Root
+          checked={enabled}
+          disabled={disabled}
+          onCheckedChange={requestChange}
+          aria-labelledby="exercise-generation-enabled-label"
+          aria-describedby="exercise-generation-enabled-description"
+          className="relative h-6 w-11 shrink-0 rounded-full bg-muted outline-none transition-colors data-[checked]:bg-primary focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <Switch.Thumb className="block size-5 translate-x-0.5 rounded-full bg-white shadow transition-transform data-[checked]:translate-x-5" />
+        </Switch.Root>
+      </div>
+
+      <div
+        className="mt-5 rounded-lg border bg-muted/35 px-4 py-3"
+        aria-live="polite"
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-sm font-semibold">
+            {enabled ? "Enabled" : "Disabled"}
+          </p>
+          {hasUnsavedChange && (
+            <span className="rounded-full border bg-background px-2 py-0.5 text-xs font-medium text-muted-foreground">
+              Pending save
+            </span>
+          )}
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {enabled
+            ? "Scheduled AI exercise generation is active."
+            : hasUnsavedChange
+              ? "Scheduled AI exercise generation will be paused after saving. Existing exercises will remain available to learners."
+              : "Scheduled AI exercise generation is paused. Existing exercises remain available to learners."}
+        </p>
+      </div>
+
+      <AlertDialog.Root
+        open={disableDialogOpen}
+        onOpenChange={setDisableDialogOpen}
+      >
+        <AlertDialog.Portal>
+          <AlertDialog.Backdrop className="fixed inset-0 z-50 bg-black/45 backdrop-blur-[1px]" />
+          <AlertDialog.Viewport className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <AlertDialog.Popup className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl outline-none dark:bg-neutral-900">
+              <AlertDialog.Title className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                Disable AI Exercise Generation?
+              </AlertDialog.Title>
+              <AlertDialog.Description className="mt-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
+                Scheduled AI exercise generation will stop. Existing exercises
+                will remain available to learners. You can enable generation
+                again at any time.
+              </AlertDialog.Description>
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <AlertDialog.Close className="inline-flex h-11 items-center justify-center rounded-lg border border-neutral-200 px-4 text-sm font-medium outline-none hover:bg-neutral-50 focus-visible:ring-3 focus-visible:ring-blue-500/30 dark:border-neutral-700 dark:hover:bg-neutral-800">
+                  Cancel
+                </AlertDialog.Close>
+                <AlertDialog.Close
+                  onClick={() => onEnabledChange(false)}
+                  className="inline-flex h-11 items-center justify-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white outline-none hover:bg-red-700 focus-visible:ring-3 focus-visible:ring-red-500/30"
+                >
+                  Disable
+                </AlertDialog.Close>
+              </div>
+            </AlertDialog.Popup>
+          </AlertDialog.Viewport>
+        </AlertDialog.Portal>
+      </AlertDialog.Root>
+    </section>
+  );
+}
+
 function NumericInput({
   id,
   min,
@@ -486,6 +612,7 @@ function toFormValues(
   settings: ExerciseGenerationSettings,
 ): ExerciseGenerationSettingsFormValues {
   return {
+    enabled: settings.enabled,
     initialDelayMinutes: settings.initialDelayMinutes,
     intervalHours: settings.intervalHours,
     minimumExerciseThreshold: settings.minimumExerciseThreshold,

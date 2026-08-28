@@ -3,6 +3,13 @@ import { cleanup } from "@testing-library/react";
 import React from "react";
 import { afterEach, vi } from "vitest";
 
+if (!window.PointerEvent) {
+  Object.defineProperty(window, "PointerEvent", {
+    configurable: true,
+    value: MouseEvent,
+  });
+}
+
 afterEach(() => cleanup());
 
 vi.mock("next/image", () => ({

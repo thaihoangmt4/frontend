@@ -1,4 +1,5 @@
 export type ExerciseGenerationSettings = {
+  enabled: boolean;
   initialDelayMinutes: number;
   intervalHours: number;
   minimumExerciseThreshold: number;
@@ -11,6 +12,7 @@ export type ExerciseGenerationSettings = {
 
 export type ExerciseGenerationSettingsValues = Pick<
   ExerciseGenerationSettings,
+  | "enabled"
   | "initialDelayMinutes"
   | "intervalHours"
   | "minimumExerciseThreshold"

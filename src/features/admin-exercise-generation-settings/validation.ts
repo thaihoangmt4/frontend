@@ -9,6 +9,7 @@ const integer = (label: string, minimum: number, maximum: number) =>
 
 export const exerciseGenerationSettingsSchema = z
   .object({
+    enabled: z.boolean(),
     initialDelayMinutes: integer("Initial delay", 0, 1_440),
     intervalHours: integer("Interval", 1, 168),
     minimumExerciseThreshold: integer("Minimum exercise threshold", 0, 500),
