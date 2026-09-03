@@ -2,18 +2,18 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LearningAudio } from "@/features/learning-catalog/components/learning-media";
-import type { ExerciseAnswer, LearningActivity } from "../types";
+import type { ExerciseAnswer, LessonExercise } from "../types";
 
 export function ExerciseInput({
-  activity,
+  exercise,
   disabled,
   onAnswer,
 }: {
-  activity: LearningActivity;
+  exercise: LessonExercise;
   disabled: boolean;
   onAnswer: (answer: ExerciseAnswer) => void;
 }) {
-  const c = activity.content;
+  const c = exercise.content;
   const [choice, setChoice] = useState("");
   const [text, setText] = useState("");
   const [order, setOrder] = useState<string[]>([]);
@@ -21,18 +21,18 @@ export function ExerciseInput({
   const [assignments, setAssignments] = useState<Record<string, string>>({});
   const options = c.options ?? [];
   if (
-    activity.exerciseType === "MultipleChoice" ||
-    activity.exerciseType === "AudioMatching"
+    exercise.exerciseType === "MultipleChoice" ||
+    exercise.exerciseType === "AudioMatching"
   )
     return (
       <div className="space-y-3">
         <p className="text-lg font-medium">
           {c.question ??
-            (activity.exerciseType === "AudioMatching"
+            (exercise.exerciseType === "AudioMatching"
               ? "Choose what you hear"
-              : activity.instruction)}
+              : exercise.instruction)}
         </p>
-        {activity.exerciseType === "AudioMatching" && (
+        {exercise.exerciseType === "AudioMatching" && (
           <LearningAudio
             text={c.pronunciationText ?? ""}
             label="pronunciation"
@@ -42,7 +42,7 @@ export function ExerciseInput({
         {options.map((o) => (
           <label
             key={o.id}
-            className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 ${choice === o.id ? "border-blue-600 bg-blue-50 dark:bg-blue-950/30" : "hover:bg-neutral-50 dark:hover:bg-neutral-800"}`}
+            className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 focus-within:ring-3 focus-within:ring-blue-500/30 ${choice === o.id ? "border-blue-600 bg-blue-50 dark:bg-blue-950/30" : "hover:bg-neutral-50 dark:hover:bg-neutral-800"}`}
           >
             <input
               type="radio"
@@ -60,7 +60,7 @@ export function ExerciseInput({
         />
       </div>
     );
-  if (activity.exerciseType === "Typing")
+  if (exercise.exerciseType === "Typing")
     return (
       <div className="space-y-4">
         <p className="text-lg font-medium">{c.prompt}</p>
@@ -75,6 +75,7 @@ export function ExerciseInput({
           }}
           className="h-12 w-full rounded-xl border bg-transparent px-4 outline-none focus:ring-3 focus:ring-blue-500/20"
           placeholder="Type your answer"
+          aria-label="Your answer"
         />
         <Submit
           disabled={disabled || !text.trim()}
@@ -82,7 +83,7 @@ export function ExerciseInput({
         />
       </div>
     );
-  if (activity.exerciseType === "SentenceOrdering") {
+  if (exercise.exerciseType === "SentenceOrdering") {
     const tokens = c.tokens ?? [];
     return (
       <div className="space-y-4">
@@ -119,7 +120,7 @@ export function ExerciseInput({
       </div>
     );
   }
-  if (activity.exerciseType === "ImageMatching")
+  if (exercise.exerciseType === "ImageMatching")
     return (
       <MappingRows
         labels={(c.sources ?? []).map((x) => ({ id: x.id, label: x.altText }))}
@@ -137,7 +138,10 @@ export function ExerciseInput({
         }
       />
     );
-  if (activity.exerciseType === "Categorization")
+  if (
+    exercise.exerciseType === "Categorization" ||
+    exercise.exerciseType === "DragDrop"
+  )
     return (
       <MappingRows
         labels={(c.items ?? []).map((x) => ({ id: x.id, label: x.text }))}
@@ -176,7 +180,7 @@ export function ExerciseInput({
 function Submit({
   disabled,
   onClick,
-  label = "Check answer",
+  label = "Check",
 }: {
   disabled: boolean;
   onClick: () => void;
@@ -186,7 +190,7 @@ function Submit({
     <div className="pt-3">
       <Button
         size="lg"
-        className="min-h-11 px-5"
+        className="min-h-11 w-full px-5 sm:w-auto"
         disabled={disabled}
         onClick={onClick}
       >
@@ -198,7 +202,7 @@ function Submit({
 function MediaUnavailable({ kind }: { kind: string }) {
   return (
     <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
-      {kind} is unavailable for this activity.
+      {kind} is unavailable for this exercise.
     </div>
   );
 }
@@ -222,7 +226,7 @@ function MappingRows({
       {labels.map((x) => (
         <label
           key={x.id}
-          className="grid gap-2 rounded-xl border p-4 sm:grid-cols-2 sm:items-center"
+          className="grid gap-2 rounded-xl border p-4 focus-within:ring-3 focus-within:ring-blue-500/30 sm:grid-cols-2 sm:items-center"
         >
           <span>{x.label}</span>
           <select

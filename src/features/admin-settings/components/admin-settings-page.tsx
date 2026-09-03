@@ -1,4 +1,4 @@
-import { ExerciseGenerationSettingsPage } from "@/features/admin-exercise-generation-settings";
+import { LessonGenerationSettingsPage } from "@/features/admin-lesson-generation-settings";
 import { SystemSettingsSection } from "@/features/admin-logging-settings";
 
 export function AdminSettingsPage() {
@@ -10,12 +10,12 @@ export function AdminSettingsPage() {
           Settings
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
-          Manage runtime configuration for background processing and application
+          Manage runtime configuration for AI lesson generation and application
           logging.
         </p>
       </header>
 
-      <ExerciseGenerationSettingsPage />
+      <LessonGenerationSettingsPage />
       <SystemSettingsSection />
     </div>
   );

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
-import type { LearningActivity } from "../types";
+import type { LessonExercise } from "../types";
 import { ExerciseInput } from "./exercise-input";
 
 class MockAudio {
@@ -17,19 +17,12 @@ class MockAudio {
     MockAudio.instances.push(this);
   }
 }
-const activity: LearningActivity = {
-  activityId: "activity",
+const exercise: LessonExercise = {
   exerciseId: "exercise",
-  activityType: "Lesson",
   exerciseType: "AudioMatching",
   title: "Listen",
   instruction: "Choose",
-  difficulty: "Beginner",
   displayOrder: 1,
-  exerciseVersion: 1,
-  isRequired: true,
-  status: "Pending",
-  latestResult: null,
   content: {
     pronunciationText: "How are you?",
     options: [
@@ -45,7 +38,7 @@ beforeEach(() => {
 
 it("uses lazy Google TTS for Audio Matching without a static audio URL", async () => {
   render(
-    <ExerciseInput activity={activity} disabled={false} onAnswer={vi.fn()} />,
+    <ExerciseInput exercise={exercise} disabled={false} onAnswer={vi.fn()} />,
   );
   expect(MockAudio.instances).toHaveLength(0);
   expect(screen.queryByText(/audio is unavailable/i)).not.toBeInTheDocument();
