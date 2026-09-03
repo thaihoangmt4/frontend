@@ -1,4 +1,4 @@
-import type { EvaluationStatus, LessonAttemptPlayerResponse } from "@/features/exercise-player/types";
+import type { EvaluationStatus } from "@/features/lesson-session/types";
 
 export type ContinueState = "Resume" | "StartNextLesson" | "CourseCompleted" | "NoActiveAssignment";
 export type ContinueLearningResponse = {
@@ -8,7 +8,6 @@ export type ContinueLearningResponse = {
   nextActivityId: string | null;
   nextLesson: { id: string; title: string; unitTitle: string; estimatedDurationMinutes: number } | null;
 };
-export type LearningSessionResponse = { mode: "Started" | "Resumed"; session: LessonAttemptPlayerResponse };
 export type LessonProgress = { id: string; code: string; title: string; displayOrder: number; state: "Completed" | "Current" | "Upcoming"; lessonAttemptId: string | null };
 export type UnitProgress = { id: string; code: string; title: string; displayOrder: number; lessons: LessonProgress[] };
 export type LearningProgressState = "InProgress" | "CourseCompleted" | "NoActiveAssignment";

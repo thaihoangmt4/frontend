@@ -1,6 +1,6 @@
 "use client";
 import axios from "axios";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { learningProgressService } from "./service";
 import { env } from "@/config/env";
 
@@ -24,10 +24,3 @@ export function useLearningProgress() { return useQuery({
 }); }
 export function useLearningHistory(pageNumber: number, pageSize = 10) { return useQuery({ queryKey: learningProgressKeys.history(pageNumber, pageSize), queryFn: ({ signal }) => learningProgressService.history(pageNumber, pageSize, signal), placeholderData: (previous) => previous }); }
 export function useLessonAttemptResult(attemptId: string) { return useQuery({ queryKey: learningProgressKeys.result(attemptId), queryFn: ({ signal }) => learningProgressService.result(attemptId, signal), enabled: Boolean(attemptId) }); }
-export function useLearningSession() {
-  const queryClient = useQueryClient();
-  return useMutation({ mutationFn: () => learningProgressService.session(), onSuccess: async (data) => {
-    queryClient.setQueryData(["lesson-attempt", data.session.attempt.id], data.session);
-    await queryClient.invalidateQueries({ queryKey: learningProgressKeys.all });
-  } });
-}
