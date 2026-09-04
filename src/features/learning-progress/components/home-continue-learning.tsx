@@ -1,32 +1,21 @@
 "use client";
-import { ArrowRight, BookOpen, CheckCircle2, Route } from "lucide-react";
+import { ArrowRight, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useContinueLearning, useLearningProgress } from "../hooks";
+import { useLessonSessionQuery } from "@/features/lesson-session";
 
 export function HomeContinueLearning() {
   const router = useRouter();
-  const state = useContinueLearning();
-  const progress = useLearningProgress();
-  if (state.isPending) return <Skeleton className="h-72 rounded-2xl" />;
-  if (state.isError || !state.data) return <ErrorCard retry={() => state.refetch()} pending={state.isFetching} />;
-
-  const courseTitle = progress.data?.course?.courseTitle ?? "Your learning path";
-  const lesson = state.data.nextLesson;
-  if (state.data.state === "CourseCompleted") return (
-    <Card icon={CheckCircle2} eyebrow="Course complete" title={courseTitle} description="You’ve reached the end of your assigned course. Take a moment to enjoy the progress you’ve made.">
-      <Button size="lg" className="mt-6 min-h-11 px-5" onClick={() => router.push("/progress")}>View Learning Progress <ArrowRight /></Button>
-    </Card>
-  );
-  if (state.data.state === "NoActiveAssignment" || !lesson) return (
-    <Card icon={Route} eyebrow="Learning path" title="Your path hasn’t been assigned yet" description="There’s nothing you need to choose. Once your learning path is ready, it will appear here automatically." />
-  );
+  const query = useLessonSessionQuery();
+  if (query.isPending) return <Skeleton className="h-72 rounded-2xl" />;
+  if (query.isError || !query.data) return <ErrorCard retry={() => query.refetch()} pending={query.isFetching} />;
+  const lesson = query.data;
   return (
     <Card icon={BookOpen} eyebrow="Next lesson" title={lesson.title}
-      description={`${courseTitle}${lesson.unitTitle ? ` · ${lesson.unitTitle}` : ""}`}>
-      <p className="mt-4 text-sm text-blue-100">About {lesson.estimatedDurationMinutes} minutes</p>
-      <Button size="lg" className="mt-6 min-h-11 bg-white px-5 text-blue-700 hover:bg-blue-50" onClick={() => router.push(`/learn/lessons/${lesson.id}`)}>
+      description={lesson.topic ?? "Continue with your assigned learning path."}>
+      <p className="mt-4 text-sm text-blue-100">{lesson.exercises.length} exercises</p>
+      <Button size="lg" className="mt-6 min-h-11 bg-white px-5 text-blue-700 hover:bg-blue-50" onClick={() => router.push(`/learn/lessons/${lesson.lessonId}`)}>
         Start Lesson <ArrowRight />
       </Button>
     </Card>

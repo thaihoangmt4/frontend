@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 
 vi.mock("../service", () => ({
   lessonSessionService: {
-    getLesson: vi.fn(),
+    getNextLesson: vi.fn(),
     submitAnswer: vi.fn(),
     completeLesson: vi.fn(),
   },
@@ -41,6 +41,7 @@ const EXERCISES: LessonExercise[] = Array.from({ length: 10 }, (_, index) => ({
   title: `Question ${index + 1}`,
   instruction: "Choose the best answer",
   displayOrder: index + 1,
+  version: 1,
   content: {
     question: `Question ${index + 1}?`,
     options: [
@@ -57,9 +58,11 @@ function answerResult(
   return {
     exerciseId,
     isCorrect,
+    status: isCorrect ? "Correct" : "Incorrect",
+    score: isCorrect ? 100 : 0,
     feedback: null,
     explanation: isCorrect ? null : "Use the polite form.",
-    correctAnswer: isCorrect ? null : { text: "I'd like the bill, please." },
+    correctAnswer: isCorrect ? null : "I'd like the bill, please.",
   };
 }
 
@@ -130,15 +133,15 @@ describe("LessonSession", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/Use the polite form./)).toBeInTheDocument();
     expect(lessonSessionService.submitAnswer).toHaveBeenCalledWith(
-      "lesson-1",
       "exercise-1",
+      1,
       { selectedOptionId: "a" },
     );
   });
 
   it("keeps progress based on ten core exercises and does not immediately repeat a wrong answer", async () => {
     vi.mocked(lessonSessionService.submitAnswer).mockImplementation(
-      async (_lessonId, exerciseId) =>
+      async (exerciseId) =>
         answerResult(exerciseId, exerciseId !== "exercise-1"),
     );
     renderSession();
@@ -153,7 +156,7 @@ describe("LessonSession", () => {
 
   it("completes without a review phase when every answer is correct", async () => {
     vi.mocked(lessonSessionService.submitAnswer).mockImplementation(
-      async (_lessonId, exerciseId) => answerResult(exerciseId, true),
+      async (exerciseId) => answerResult(exerciseId, true),
     );
     renderSession();
     await user.click(screen.getByRole("button", { name: /Start/ }));
@@ -175,7 +178,7 @@ describe("LessonSession", () => {
 
   it("reviews each wrong exercise exactly once and never requeues it", async () => {
     vi.mocked(lessonSessionService.submitAnswer).mockImplementation(
-      async (_lessonId, exerciseId) =>
+      async (exerciseId) =>
         answerResult(exerciseId, exerciseId !== "exercise-2"),
     );
     renderSession();
@@ -204,14 +207,14 @@ describe("LessonSession", () => {
     ).toBeInTheDocument();
     const reviewAttempts = vi
       .mocked(lessonSessionService.submitAnswer)
-      .mock.calls.filter(([, exerciseId]) => exerciseId === "exercise-2");
+      .mock.calls.filter(([exerciseId]) => exerciseId === "exercise-2");
     expect(reviewAttempts).toHaveLength(2);
     expect(lessonSessionService.completeLesson).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the session recoverable when completion fails and clears it after a retry", async () => {
     vi.mocked(lessonSessionService.submitAnswer).mockImplementation(
-      async (_lessonId, exerciseId) => answerResult(exerciseId, true),
+      async (exerciseId) => answerResult(exerciseId, true),
     );
     vi.mocked(lessonSessionService.completeLesson)
       .mockRejectedValueOnce(new Error("offline"))
@@ -243,7 +246,7 @@ describe("LessonSession", () => {
 
   it("confirms before leaving and preserves the exercise when the learner keeps going", async () => {
     vi.mocked(lessonSessionService.submitAnswer).mockImplementation(
-      async (_lessonId, exerciseId) => answerResult(exerciseId, true),
+      async (exerciseId) => answerResult(exerciseId, true),
     );
     renderSession();
     await user.click(screen.getByRole("button", { name: /Start/ }));

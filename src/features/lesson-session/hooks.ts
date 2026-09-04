@@ -2,23 +2,22 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/auth.store";
-import { learningProgressKeys } from "@/features/learning-progress/hooks";
 import { lessonSessionService } from "./service";
 import type { ExerciseAnswer } from "./types";
 
 export const lessonSessionKeys = {
   all: ["lesson-session"] as const,
-  lesson: (lessonId: string) => ["lesson-session", lessonId] as const,
+  next: () => ["lesson-session", "next"] as const,
 };
 
-export function useLessonSessionQuery(lessonId: string) {
+export function useLessonSessionQuery() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isLoading = useAuthStore((state) => state.isLoading);
 
   return useQuery({
-    queryKey: lessonSessionKeys.lesson(lessonId),
-    queryFn: ({ signal }) => lessonSessionService.getLesson(lessonId, signal),
-    enabled: !isLoading && isAuthenticated && lessonId.length > 0,
+    queryKey: lessonSessionKeys.next(),
+    queryFn: ({ signal }) => lessonSessionService.getNextLesson(signal),
+    enabled: !isLoading && isAuthenticated,
     refetchOnWindowFocus: false,
     staleTime: Infinity,
   });
@@ -26,13 +25,14 @@ export function useLessonSessionQuery(lessonId: string) {
 
 export type SubmitAnswerVariables = {
   exerciseId: string;
+  exerciseVersion: number;
   answer: ExerciseAnswer;
 };
 
-export function useSubmitAnswerMutation(lessonId: string) {
+export function useSubmitAnswerMutation() {
   return useMutation({
-    mutationFn: ({ exerciseId, answer }: SubmitAnswerVariables) =>
-      lessonSessionService.submitAnswer(lessonId, exerciseId, answer),
+    mutationFn: ({ exerciseId, exerciseVersion, answer }: SubmitAnswerVariables) =>
+      lessonSessionService.submitAnswer(exerciseId, exerciseVersion, answer),
   });
 }
 
@@ -43,7 +43,7 @@ export function useCompleteLessonMutation(lessonId: string) {
     mutationFn: () => lessonSessionService.completeLesson(lessonId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: learningProgressKeys.all,
+        queryKey: lessonSessionKeys.next(),
       });
     },
   });

@@ -23,6 +23,7 @@ const exercise: LessonExercise = {
   title: "Listen",
   instruction: "Choose",
   displayOrder: 1,
+  version: 1,
   content: {
     pronunciationText: "How are you?",
     options: [

@@ -31,7 +31,7 @@ export function LessonSession({
 }) {
   const router = useRouter();
   const session = useLessonSession(lesson.id, exercises);
-  const submit = useSubmitAnswerMutation(lesson.id);
+  const submit = useSubmitAnswerMutation();
   const complete = useCompleteLessonMutation(lesson.id);
   const [exitDialogOpen, setExitDialogOpen] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
@@ -60,6 +60,7 @@ export function LessonSession({
     try {
       const result = await submit.mutateAsync({
         exerciseId: currentExercise.exerciseId,
+        exerciseVersion: currentExercise.version,
         answer: value,
       });
       session.registerAnswer(result);

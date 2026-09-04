@@ -31,10 +31,10 @@ export function AnswerFeedbackPanel({
           ) : (
             correct && <p className="mt-1 text-sm">Nice work.</p>
           )}
-          {!correct && feedback.correctAnswer?.text && (
+          {!correct && feedback.correctAnswer && (
             <p className="mt-3 text-sm">
               <span className="font-semibold">Correct answer: </span>
-              {feedback.correctAnswer.text}
+              {formatCorrectAnswer(feedback.correctAnswer)}
             </p>
           )}
           {feedback.explanation && (
@@ -56,4 +56,8 @@ export function AnswerFeedbackPanel({
       </div>
     </div>
   );
+}
+
+function formatCorrectAnswer(value: string | number | boolean | object): string {
+  return typeof value === "string" ? value : JSON.stringify(value);
 }

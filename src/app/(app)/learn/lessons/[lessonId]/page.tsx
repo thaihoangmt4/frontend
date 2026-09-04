@@ -5,11 +5,6 @@ export const metadata: Metadata = {
   title: "Lesson — AI English Learning Platform",
 };
 
-export default async function LearnLessonRoute({
-  params,
-}: {
-  params: Promise<{ lessonId: string }>;
-}) {
-  const { lessonId } = await params;
-  return <LessonSessionPage lessonId={lessonId} />;
+export default function LearnLessonRoute() {
+  return <LessonSessionPage />;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertDialog } from "@base-ui/react/alert-dialog";
 import { Switch } from "@base-ui/react/switch";
 import axios from "axios";
@@ -13,10 +13,7 @@ import {
   useLessonGenerationSettings,
   useUpdateLessonGenerationSettings,
 } from "../hooks";
-import type {
-  BackendValidationError,
-  LessonGenerationSettings,
-} from "../types";
+import type { LessonGenerationSettings } from "../types";
 
 export function LessonGenerationSettingsPage() {
   const query = useLessonGenerationSettings();
@@ -66,60 +63,39 @@ export function LessonGenerationSettingsPage() {
         </p>
       </header>
 
-      <LessonGenerationSettingsForm
-        settings={query.data}
-        reloadLatest={async () => (await query.refetch()).data}
-      />
+      <LessonGenerationSettingsForm settings={query.data} />
     </section>
   );
 }
 
 function LessonGenerationSettingsForm({
   settings,
-  reloadLatest,
 }: {
   settings: LessonGenerationSettings;
-  reloadLatest: () => Promise<LessonGenerationSettings | undefined>;
 }) {
-  const initializedVersion = useRef<string | null>(null);
   const [enabled, setEnabled] = useState(settings.enabled);
   const [formError, setFormError] = useState<string | null>(null);
-  const [hasConflict, setHasConflict] = useState(false);
   const [disableDialogOpen, setDisableDialogOpen] = useState(false);
   const mutation = useUpdateLessonGenerationSettings();
   const toast = useToast();
 
   useEffect(() => {
-    if (initializedVersion.current === settings.version) return;
-    initializedVersion.current = settings.version;
     setEnabled(settings.enabled);
     setFormError(null);
-    setHasConflict(false);
-  }, [settings]);
+  }, [settings.enabled]);
 
   const isDirty = enabled !== settings.enabled;
 
   async function save() {
     setFormError(null);
-    setHasConflict(false);
 
     try {
       const updated = await mutation.mutateAsync({
         enabled,
-        version: settings.version,
       });
-      initializedVersion.current = updated.version;
       setEnabled(updated.enabled);
       toast.success("Lesson generation settings updated.");
-    } catch (error: unknown) {
-      if (isConcurrencyConflict(error)) {
-        setHasConflict(true);
-        setFormError(
-          "These settings were changed by another administrator. Reload the latest values before saving.",
-        );
-        return;
-      }
-
+    } catch {
       setFormError(
         "We couldn’t save these settings. Your change is still here, so please try again.",
       );
@@ -128,15 +104,6 @@ function LessonGenerationSettingsForm({
         "Please check your connection and try again.",
       );
     }
-  }
-
-  async function reloadAfterConflict() {
-    const latest = await reloadLatest();
-    if (!latest) return;
-    initializedVersion.current = latest.version;
-    setEnabled(latest.enabled);
-    setFormError(null);
-    setHasConflict(false);
   }
 
   return (
@@ -242,17 +209,8 @@ function LessonGenerationSettingsForm({
       )}
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <SettingsMetadata settings={settings} />
+        <div />
         <div className="flex flex-col-reverse gap-3 sm:flex-row">
-          {hasConflict && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={reloadAfterConflict}
-            >
-              Reload latest
-            </Button>
-          )}
           <Button
             type="button"
             variant="outline"
@@ -260,31 +218,19 @@ function LessonGenerationSettingsForm({
             onClick={() => {
               setEnabled(settings.enabled);
               setFormError(null);
-              setHasConflict(false);
             }}
           >
             Reset
           </Button>
           <Button
             type="button"
-            disabled={!isDirty || mutation.isPending || hasConflict}
+            disabled={!isDirty || mutation.isPending}
             onClick={save}
           >
             {mutation.isPending ? "Saving…" : "Save settings"}
           </Button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function SettingsMetadata({ settings }: { settings: LessonGenerationSettings }) {
-  return (
-    <div className="text-xs text-muted-foreground">
-      <p>Last updated: {formatTimestamp(settings.updatedAtUtc)}</p>
-      {settings.updatedByUserId && (
-        <p className="mt-1 font-mono">Updated by: {settings.updatedByUserId}</p>
-      )}
     </div>
   );
 }
@@ -327,23 +273,3 @@ function PageState({
   );
 }
 
-function formatTimestamp(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function isConcurrencyConflict(error: unknown): boolean {
-  if (!axios.isAxiosError<BackendValidationError>(error)) return false;
-  return (
-    error.response?.status === 409 ||
-    error.response?.data?.error ===
-      "exercise_generation.settings_concurrency_conflict"
-  );
-}

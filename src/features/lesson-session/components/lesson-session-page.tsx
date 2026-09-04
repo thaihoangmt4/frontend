@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useLessonSessionQuery } from "../hooks";
 import { LessonSession } from "./lesson-session";
 
-export function LessonSessionPage({ lessonId }: { lessonId: string }) {
-  const query = useLessonSessionQuery(lessonId);
+export function LessonSessionPage() {
+  const query = useLessonSessionQuery();
 
   if (query.isPending)
     return (
@@ -36,7 +36,12 @@ export function LessonSessionPage({ lessonId }: { lessonId: string }) {
 
   return (
     <LessonSession
-      lesson={query.data.lesson}
+      lesson={{
+        id: query.data.lessonId,
+        title: query.data.title,
+        description: query.data.topic,
+        learningObjectiveSummary: query.data.learningObjective,
+      }}
       exercises={query.data.exercises}
     />
   );

@@ -43,6 +43,7 @@ export type LessonExercise = {
   title: string;
   instruction: string;
   displayOrder: number;
+  version: number;
   content: ExerciseContent;
 };
 
@@ -54,7 +55,11 @@ export type LessonSessionLesson = {
 };
 
 export type LessonSessionResponse = {
-  lesson: LessonSessionLesson;
+  lessonId: string;
+  title: string;
+  topic: string | null;
+  learningObjective: string | null;
+  order: number;
   exercises: LessonExercise[];
 };
 
@@ -70,8 +75,10 @@ export type CorrectAnswer = { text: string | null };
 
 export type SubmitAnswerResponse = {
   exerciseId: string;
-  isCorrect: boolean;
+  status: EvaluationStatus;
+  score: number | null;
   feedback: string | null;
   explanation: string | null;
-  correctAnswer: CorrectAnswer | null;
+  correctAnswer: string | number | boolean | object | null;
+  isCorrect: boolean;
 };

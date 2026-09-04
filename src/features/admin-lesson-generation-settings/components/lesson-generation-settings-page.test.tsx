@@ -20,9 +20,6 @@ vi.mock("@/hooks/useToast", () => ({
 
 const SETTINGS: LessonGenerationSettings = {
   enabled: true,
-  updatedAtUtc: "2026-08-26T08:00:00Z",
-  updatedByUserId: "admin-user",
-  version: "v1",
 };
 
 const refetch = vi.fn();
@@ -53,22 +50,11 @@ describe("LessonGenerationSettingsPage", () => {
       screen.getByRole("heading", { name: "Lesson Generation" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("switch")).toBeChecked();
-    expect(screen.queryByText(/Exercise Generation/)).not.toBeInTheDocument();
-
-    for (const label of [
-      /Initial Delay/i,
-      /Interval/i,
-      /Minimum/i,
-      /Target/i,
-      /Maximum/i,
-    ]) {
-      expect(screen.queryByLabelText(label)).not.toBeInTheDocument();
-    }
-    expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
+    expect(screen.getByText(/AI Lesson Generation/)).toBeInTheDocument();
   });
 
   it("saves the toggle after the disable confirmation", async () => {
-    mutateAsync.mockResolvedValue({ ...SETTINGS, enabled: false, version: "v2" });
+    mutateAsync.mockResolvedValue({ ...SETTINGS, enabled: false });
     render(<LessonGenerationSettingsPage />);
 
     await user.click(screen.getByRole("switch"));
@@ -83,10 +69,9 @@ describe("LessonGenerationSettingsPage", () => {
     await user.click(screen.getByRole("button", { name: "Save settings" }));
 
     await waitFor(() =>
-      expect(mutateAsync).toHaveBeenCalledWith({
-        enabled: false,
-        version: "v1",
-      }),
+        expect(mutateAsync).toHaveBeenCalledWith({
+          enabled: false,
+        }),
     );
     expect(toastSuccess).toHaveBeenCalledWith(
       "Lesson generation settings updated.",

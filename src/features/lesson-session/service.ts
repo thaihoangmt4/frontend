@@ -8,27 +8,24 @@ import type {
 const API = "/api/learning";
 
 export const lessonSessionService = {
-  async getLesson(
-    lessonId: string,
-    signal?: AbortSignal,
-  ): Promise<LessonSessionResponse> {
+  async getNextLesson(signal?: AbortSignal): Promise<LessonSessionResponse> {
     const { data } = await axiosClient.get<LessonSessionResponse>(
-      `${API}/lessons/${encodeURIComponent(lessonId)}`,
+      `${API}/next-lesson`,
       { signal },
     );
     return data;
   },
 
   async submitAnswer(
-    lessonId: string,
     exerciseId: string,
+    exerciseVersion: number,
     answer: ExerciseAnswer,
   ): Promise<SubmitAnswerResponse> {
     const { data } = await axiosClient.post<SubmitAnswerResponse>(
-      `${API}/lessons/${encodeURIComponent(lessonId)}/exercises/${encodeURIComponent(exerciseId)}/answer`,
-      { answer },
+      `${API}/exercises/${encodeURIComponent(exerciseId)}/answer`,
+      { exerciseVersion, answer },
     );
-    return data;
+    return { ...data, isCorrect: data.status === "Correct" };
   },
 
   async completeLesson(lessonId: string): Promise<void> {

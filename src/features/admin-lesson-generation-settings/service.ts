@@ -4,8 +4,7 @@ import type {
   UpdateLessonGenerationSettingsRequest,
 } from "./types";
 
-// The backend route keeps its original name; only user-facing wording changed.
-const SETTINGS_URL = "/api/admin/settings/exercise-generation";
+const SETTINGS_URL = "/api/admin/settings/lesson-generation";
 
 export const lessonGenerationSettingsService = {
   async get(signal?: AbortSignal): Promise<LessonGenerationSettings> {

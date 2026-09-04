@@ -6,16 +6,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/useToast";
 import { useLessonGenerationSettings } from "@/features/admin-lesson-generation-settings";
-import { useAdminUnitLessons, useGenerateLesson } from "../hooks";
+import { useGenerateLesson } from "../hooks";
 import type { GenerationError } from "../types";
 
 export function AddLessonPage({ unitId }: { unitId: string }) {
   const router = useRouter();
   const toast = useToast();
-  const unitQuery = useAdminUnitLessons(unitId);
   const settings = useLessonGenerationSettings();
   const generate = useGenerateLesson(unitId);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -51,13 +49,7 @@ export function AddLessonPage({ unitId }: { unitId: string }) {
 
       <section className="rounded-xl border bg-card p-5 shadow-sm sm:p-6">
         <h2 className="text-sm font-medium text-muted-foreground">Unit</h2>
-        {unitQuery.isPending ? (
-          <Skeleton className="mt-2 h-6 w-56" />
-        ) : (
-          <p className="mt-1 text-lg font-semibold">
-            {unitQuery.data?.unit.title ?? "This unit"}
-          </p>
-        )}
+        <p className="mt-1 text-lg font-semibold">Unit {unitId}</p>
 
         <p className="mt-5 max-w-xl text-sm leading-6 text-muted-foreground">
           AI will generate the next lesson for this unit. Each lesson contains
@@ -109,7 +101,7 @@ export function AddLessonPage({ unitId }: { unitId: string }) {
 function toUserMessage(error: unknown): string {
   if (axios.isAxiosError<GenerationError>(error)) {
     const status = error.response?.status;
-    if (status === 403)
+    if (status === 409)
       return "AI Lesson Generation is currently disabled. Enable it in Settings and try again.";
     if (status === 404) return "This unit no longer exists.";
     if (status === 429)

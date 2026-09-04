@@ -11,7 +11,6 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 
 vi.mock("../service", () => ({
   adminLessonGenerationService: {
-    getUnitLessons: vi.fn(),
     generateLesson: vi.fn(),
   },
 }));
@@ -43,10 +42,6 @@ const user = userEvent.setup();
 beforeEach(() => {
   vi.clearAllMocks();
   settingsState = settingsEnabled;
-  vi.mocked(adminLessonGenerationService.getUnitLessons).mockResolvedValue({
-    unit: { id: "unit-1", code: "U1", title: "Food Basics" },
-    items: [],
-  });
 });
 
 describe("AddLessonPage", () => {
@@ -56,7 +51,7 @@ describe("AddLessonPage", () => {
     expect(
       screen.getByRole("heading", { name: "Add Lesson" }),
     ).toBeInTheDocument();
-    expect(await screen.findByText("Food Basics")).toBeInTheDocument();
+    expect(screen.getByText("Unit unit-1")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Generate Lesson/ }),
     ).toBeEnabled();
@@ -151,8 +146,8 @@ describe("AddLessonPage", () => {
 
   it("explains the backend rejection when generation is turned off server-side", async () => {
     vi.mocked(adminLessonGenerationService.generateLesson).mockRejectedValue(
-      new AxiosError("forbidden", "403", undefined, undefined, {
-        status: 403,
+      new AxiosError("disabled", "409", undefined, undefined, {
+        status: 409,
         statusText: "Forbidden",
         data: {},
         headers: new AxiosHeaders(),
